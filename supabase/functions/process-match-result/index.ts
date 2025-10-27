@@ -112,7 +112,7 @@ Deno.serve(async (req) => {
 
     // Process each bet
     for (const bet of bets || []) {
-      const isWinner = bet.selection === result;
+      const isWinner = bet.selection.toLowerCase() === result.toLowerCase();
       const betResult = isWinner ? 'won' : 'lost';
       
       console.log(`Processing bet ${bet.id}: user=${bet.user_id}, selection=${bet.selection}, result=${betResult}`);

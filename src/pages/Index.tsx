@@ -13,6 +13,7 @@ import { format } from "date-fns";
 
 interface Bet {
   id: string;
+  matchId: string;
   selection: string;
   odds: number;
 }
@@ -112,7 +113,7 @@ const Index = () => {
     if (existingBet) {
       setBets(bets.filter((bet) => bet.id !== betId));
     } else {
-      setBets([...bets, { id: betId, selection, odds }]);
+      setBets([...bets, { id: betId, matchId, selection, odds }]);
     }
   };
 
@@ -152,7 +153,7 @@ const Index = () => {
       const betPromises = bets.map(bet =>
         supabase.from("bets").insert({
           user_id: user.id,
-          match_id: bet.id,
+          match_id: bet.matchId,
           selection: bet.selection,
           odds: bet.odds,
           stake: stake / bets.length,
