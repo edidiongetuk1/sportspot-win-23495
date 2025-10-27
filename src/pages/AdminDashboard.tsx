@@ -144,72 +144,49 @@ export default function AdminDashboard() {
     if (team1Score > team2Score) result = "team1_win";
     if (team2Score > team1Score) result = "team2_win";
 
-    const { error } = await supabase
-      .from("matches")
-      .update({
-        team1_score: team1Score,
-        team2_score: team2Score,
-        result,
-        status: "completed",
-      })
-      .eq("id", matchId);
+    try {
+      // Call the Edge Function to process match result and settle bets
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        toast({
+          title: "Error",
+          description: "Not authenticated",
+          variant: "destructive",
+        });
+        return;
+      }
 
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to update match result",
-        variant: "destructive",
+      const { data, error } = await supabase.functions.invoke('process-match-result', {
+        body: { matchId, result }
       });
-    } else {
+
+      if (error) {
+        throw error;
+      }
+
       toast({
         title: "Success",
-        description: "Match result updated successfully",
+        description: data?.message || "Match result processed successfully",
       });
-      await processMatchBets(matchId, result);
-      fetchMatches();
-    }
-  };
 
-  const processMatchBets = async (matchId: string, result: string) => {
-    // Fetch all bets for this match
-    const { data: bets, error: betsError } = await supabase
-      .from("bets")
-      .select("*")
-      .eq("match_id", matchId)
-      .eq("status", "pending");
-
-    if (betsError || !bets) return;
-
-    // Process each bet
-    for (const bet of bets) {
-      const won = bet.selection === result;
-      
-      if (won) {
-        // Update user balance
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("balance")
-          .eq("id", bet.user_id)
-          .single();
-
-        if (profile) {
-          await supabase
-            .from("profiles")
-            .update({ balance: profile.balance + bet.potential_win })
-            .eq("id", bet.user_id);
-        }
-
-        // Update bet status
-        await supabase
-          .from("bets")
-          .update({ status: "won", result: "won" })
-          .eq("id", bet.id);
-      } else {
-        await supabase
-          .from("bets")
-          .update({ status: "lost", result: "lost" })
-          .eq("id", bet.id);
+      // Show processing stats if available
+      if (data?.stats) {
+        console.log('Match processing stats:', data.stats);
+        toast({
+          title: "Bets Settled",
+          description: `${data.stats.winners} winners, ${data.stats.losers} losers. Total payout: ₦${data.stats.totalPayout}`,
+        });
       }
+
+      fetchMatches();
+    } catch (error: any) {
+      console.error('Error processing match result:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to process match result",
+        variant: "destructive",
+      });
     }
   };
 

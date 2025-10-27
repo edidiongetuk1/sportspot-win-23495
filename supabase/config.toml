@@ -1,1 +1,4 @@
 project_id = "jophhthiyefsorepgdoz"
+
+[functions.process-match-result]
+verify_jwt = true
