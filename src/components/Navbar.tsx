@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Wallet, User, LogOut } from "lucide-react";
+import { Wallet, User, LogOut, Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 
 interface NavbarProps {
@@ -41,9 +41,19 @@ export const Navbar = ({ balance = 0, isAuthenticated = false, onLogout, isAdmin
           <div className="flex items-center gap-3">
             {isAuthenticated ? (
               <>
-          <div className="flex items-center gap-2 px-4 py-2 bg-secondary rounded-lg">
-            <Wallet className="w-4 h-4 text-accent" />
-            <span className="font-bold text-accent">${balance.toFixed(2)}</span>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 px-4 py-2 bg-secondary rounded-lg">
+              <Wallet className="w-4 h-4 text-accent" />
+              <span className="font-bold text-accent">${balance.toFixed(2)}</span>
+            </div>
+            <Button 
+              variant="bet" 
+              size="sm"
+              onClick={() => window.location.href = 'https://sandbox.flutterwave.com/pay/orrfroxviazv'}
+            >
+              <Plus className="w-4 h-4 mr-1" />
+              Deposit
+            </Button>
           </div>
           <Button variant="ghost" asChild>
             <Link to="/dashboard">Dashboard</Link>
