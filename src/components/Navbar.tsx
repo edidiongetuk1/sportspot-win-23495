@@ -49,7 +49,7 @@ export const Navbar = ({ balance = 0, isAuthenticated = false, onLogout, isAdmin
             <Button 
               variant="bet" 
               size="sm"
-              onClick={() => window.location.href = 'https://sandbox.flutterwave.com/pay/orrfroxviazv'}
+              onClick={() => window.location.href = 'https://paystack.shop/pay/imx4s34hm4'}
             >
               <Plus className="w-4 h-4 mr-1" />
               Deposit
