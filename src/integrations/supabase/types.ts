@@ -14,16 +14,348 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      bets: {
+        Row: {
+          created_at: string
+          id: string
+          match_id: string
+          odds: number
+          potential_win: number
+          result: string | null
+          selection: string
+          stake: number
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          match_id: string
+          odds: number
+          potential_win: number
+          result?: string | null
+          selection: string
+          stake: number
+          status?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          match_id?: string
+          odds?: number
+          potential_win?: number
+          result?: string | null
+          selection?: string
+          stake?: number
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      casino_bets: {
+        Row: {
+          amount: number
+          bet_data: Json | null
+          created_at: string
+          game_round_id: string | null
+          game_type: string
+          id: string
+          multiplier: number | null
+          payout: number | null
+          settled_at: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          bet_data?: Json | null
+          created_at?: string
+          game_round_id?: string | null
+          game_type: string
+          id?: string
+          multiplier?: number | null
+          payout?: number | null
+          settled_at?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          bet_data?: Json | null
+          created_at?: string
+          game_round_id?: string | null
+          game_type?: string
+          id?: string
+          multiplier?: number | null
+          payout?: number | null
+          settled_at?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "casino_bets_game_round_id_fkey"
+            columns: ["game_round_id"]
+            isOneToOne: false
+            referencedRelation: "casino_game_rounds"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      casino_game_rounds: {
+        Row: {
+          created_at: string
+          game_type: string
+          id: string
+          multiplier: number | null
+          outcome_data: Json
+          result: string | null
+          seed: string
+        }
+        Insert: {
+          created_at?: string
+          game_type: string
+          id?: string
+          multiplier?: number | null
+          outcome_data: Json
+          result?: string | null
+          seed: string
+        }
+        Update: {
+          created_at?: string
+          game_type?: string
+          id?: string
+          multiplier?: number | null
+          outcome_data?: Json
+          result?: string | null
+          seed?: string
+        }
+        Relationships: []
+      }
+      matches: {
+        Row: {
+          competition: string
+          created_at: string | null
+          id: string
+          match_date: string
+          odds_draw: number
+          odds_team1_win: number
+          odds_team2_win: number
+          result: string | null
+          status: string
+          team1: string
+          team1_score: number | null
+          team2: string
+          team2_score: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          competition: string
+          created_at?: string | null
+          id?: string
+          match_date: string
+          odds_draw: number
+          odds_team1_win: number
+          odds_team2_win: number
+          result?: string | null
+          status?: string
+          team1: string
+          team1_score?: number | null
+          team2: string
+          team2_score?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          competition?: string
+          created_at?: string | null
+          id?: string
+          match_date?: string
+          odds_draw?: number
+          odds_team1_win?: number
+          odds_team2_win?: number
+          result?: string | null
+          status?: string
+          team1?: string
+          team1_score?: number | null
+          team2?: string
+          team2_score?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      mobile_wagers: {
+        Row: {
+          created_at: string
+          expires_at: string
+          game_type: string
+          id: string
+          match_details: Json | null
+          player_a_id: string
+          player_b_id: string | null
+          stake_amount: number
+          status: string
+          winner_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          expires_at: string
+          game_type: string
+          id?: string
+          match_details?: Json | null
+          player_a_id: string
+          player_b_id?: string | null
+          stake_amount: number
+          status?: string
+          winner_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          game_type?: string
+          id?: string
+          match_details?: Json | null
+          player_a_id?: string
+          player_b_id?: string | null
+          stake_amount?: number
+          status?: string
+          winner_id?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          balance: number
+          created_at: string
+          email: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          balance?: number
+          created_at?: string
+          email: string
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          balance?: number
+          created_at?: string
+          email?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      wager_proofs: {
+        Row: {
+          admin_notes: string | null
+          id: string
+          screenshot_url: string
+          status: string
+          submitted_at: string
+          user_id: string
+          wager_id: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          id?: string
+          screenshot_url: string
+          status?: string
+          submitted_at?: string
+          user_id: string
+          wager_id: string
+        }
+        Update: {
+          admin_notes?: string | null
+          id?: string
+          screenshot_url?: string
+          status?: string
+          submitted_at?: string
+          user_id?: string
+          wager_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wager_proofs_wager_id_fkey"
+            columns: ["wager_id"]
+            isOneToOne: false
+            referencedRelation: "mobile_wagers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wager_transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          type: string
+          user_id: string
+          wager_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          type: string
+          user_id: string
+          wager_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          type?: string
+          user_id?: string
+          wager_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wager_transactions_wager_id_fkey"
+            columns: ["wager_id"]
+            isOneToOne: false
+            referencedRelation: "mobile_wagers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +482,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+    },
   },
 } as const

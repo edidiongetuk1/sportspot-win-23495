@@ -39,6 +39,9 @@ export const Navbar = ({ balance = 0, isAuthenticated = false, onLogout, isAdmin
             <Link to="/casino" className="text-muted-foreground hover:text-primary transition-colors">
               Casino
             </Link>
+            <Link to="/mobile-wagers" className="text-muted-foreground hover:text-primary transition-colors">
+              Mobile Wagers
+            </Link>
           </div>
 
           {/* Desktop User Actions */}
@@ -115,6 +118,9 @@ export const Navbar = ({ balance = 0, isAuthenticated = false, onLogout, isAdmin
                   </Link>
                   <Link to="/casino" onClick={() => setIsOpen(false)} className="text-muted-foreground hover:text-primary transition-colors py-2">
                     Casino
+                  </Link>
+                  <Link to="/mobile-wagers" onClick={() => setIsOpen(false)} className="text-muted-foreground hover:text-primary transition-colors py-2">
+                    Mobile Wagers
                   </Link>
                   {isAuthenticated ? (
                     <>
