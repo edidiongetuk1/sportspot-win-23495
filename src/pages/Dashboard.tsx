@@ -126,7 +126,7 @@ export default function Dashboard() {
         <div className="grid gap-6 md:grid-cols-3 mb-8">
           <Card className="p-6">
             <p className="text-sm text-muted-foreground mb-2">Current Balance</p>
-            <p className="text-3xl font-bold text-accent">${profile?.balance.toFixed(2)}</p>
+            <p className="text-3xl font-bold text-accent">₦{profile?.balance.toFixed(2)}</p>
           </Card>
           <Card className="p-6">
             <p className="text-sm text-muted-foreground mb-2">Total Bets</p>
@@ -178,11 +178,11 @@ export default function Dashboard() {
                     </div>
                     <div>
                       <p className="text-sm text-muted-foreground">Stake</p>
-                      <p className="font-bold">${bet.stake.toFixed(2)}</p>
+                      <p className="font-bold">₦{bet.stake.toFixed(2)}</p>
                     </div>
                     <div>
                       <p className="text-sm text-muted-foreground">Potential Win</p>
-                      <p className="font-bold text-accent">${bet.potential_win.toFixed(2)}</p>
+                      <p className="font-bold text-accent">₦{bet.potential_win.toFixed(2)}</p>
                     </div>
                   </div>
                 </Card>

@@ -176,7 +176,7 @@ const Index = () => {
 
       toast({
         title: "Bet placed!",
-        description: `Your bet has been placed. Potential win: $${potentialWin.toFixed(2)}`,
+        description: `Your bet has been placed. Potential win: ₦${potentialWin.toFixed(2)}`,
       });
     } catch (error) {
       toast({

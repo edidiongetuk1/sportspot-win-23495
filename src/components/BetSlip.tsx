@@ -1,7 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { X, DollarSign } from "lucide-react";
+import { X, Wallet } from "lucide-react";
 import { useState } from "react";
 
 interface Bet {
@@ -85,13 +85,13 @@ export const BetSlip = ({ bets, onRemoveBet, onClearAll, onPlaceBet, userBalance
             <div className="space-y-2">
               <label className="text-sm font-medium">Stake Amount</label>
               <div className="relative">
-                <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">₦</span>
                 <Input
                   type="number"
                   placeholder="0.00"
                   value={stake}
                   onChange={(e) => setStake(e.target.value)}
-                  className="pl-10"
+                  className="pl-8"
                   min="0"
                   step="0.01"
                 />
@@ -106,11 +106,11 @@ export const BetSlip = ({ bets, onRemoveBet, onClearAll, onPlaceBet, userBalance
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Potential Win</span>
-                <span className="font-bold text-primary">${potentialWin.toFixed(2)}</span>
+                <span className="font-bold text-primary">₦{potentialWin.toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Balance</span>
-                <span className="font-medium">${userBalance.toFixed(2)}</span>
+                <span className="font-medium">₦{userBalance.toFixed(2)}</span>
               </div>
             </div>
 
@@ -121,7 +121,7 @@ export const BetSlip = ({ bets, onRemoveBet, onClearAll, onPlaceBet, userBalance
               disabled={!stake || stakeAmount <= 0 || stakeAmount > userBalance}
               onClick={handlePlaceBet}
             >
-              Place Bet - ${potentialWin.toFixed(2)}
+              Place Bet - ₦{potentialWin.toFixed(2)}
             </Button>
             {stakeAmount > userBalance && (
               <p className="text-xs text-destructive text-center">

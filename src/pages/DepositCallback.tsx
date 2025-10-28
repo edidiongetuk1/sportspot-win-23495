@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { CheckCircle2, XCircle, Loader2 } from "lucide-react";
+import { CheckCircle2, XCircle, Loader2, Wallet } from "lucide-react";
 
 const DepositCallback = () => {
   const [searchParams] = useSearchParams();
@@ -66,7 +66,7 @@ const DepositCallback = () => {
 
       toast({
         title: "Deposit successful!",
-        description: `$${amount} has been added to your balance`,
+        description: `₦${amount} has been added to your balance`,
       });
 
       navigate("/dashboard");
@@ -109,20 +109,25 @@ const DepositCallback = () => {
                 <label className="text-sm font-medium mb-2 block">
                   Enter Deposit Amount
                 </label>
-                <Input
-                  type="number"
-                  placeholder="0.00"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  min="0"
-                  step="0.01"
-                />
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">₦</span>
+                  <Input
+                    type="number"
+                    placeholder="0.00"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                    min="0"
+                    step="0.01"
+                    className="pl-8"
+                  />
+                </div>
                 <p className="text-xs text-muted-foreground mt-1">
                   Please enter the amount you deposited
                 </p>
               </div>
 
               <Button
+                variant="bet"
                 className="w-full"
                 onClick={handleConfirmDeposit}
                 disabled={isProcessing}
@@ -133,7 +138,10 @@ const DepositCallback = () => {
                     Processing...
                   </>
                 ) : (
-                  "Confirm & Add to Balance"
+                  <>
+                    <Wallet className="w-4 h-4 mr-2" />
+                    Add ₦{parseFloat(amount || '0').toFixed(2)} to Balance
+                  </>
                 )}
               </Button>
             </div>
@@ -165,17 +173,22 @@ const DepositCallback = () => {
                 <label className="text-sm font-medium mb-2 block">
                   Deposit Amount
                 </label>
-                <Input
-                  type="number"
-                  placeholder="0.00"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  min="0"
-                  step="0.01"
-                />
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">₦</span>
+                  <Input
+                    type="number"
+                    placeholder="0.00"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                    min="0"
+                    step="0.01"
+                    className="pl-8"
+                  />
+                </div>
               </div>
 
               <Button
+                variant="bet"
                 className="w-full"
                 onClick={handleConfirmDeposit}
                 disabled={isProcessing}
@@ -186,7 +199,10 @@ const DepositCallback = () => {
                     Processing...
                   </>
                 ) : (
-                  "Confirm Deposit"
+                  <>
+                    <Wallet className="w-4 h-4 mr-2" />
+                    Confirm ₦{parseFloat(amount || '0').toFixed(2)}
+                  </>
                 )}
               </Button>
 
