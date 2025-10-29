@@ -17,6 +17,7 @@ interface MyWager {
   status: string;
   created_at: string;
   winner_id: string | null;
+  wager_code: string;
 }
 
 interface MyWagersTabProps {
@@ -62,11 +63,22 @@ export const MyWagersTab = ({ userId, onBalanceUpdate }: MyWagersTabProps) => {
     return data?.status || null;
   };
 
-  const getStatusBadge = (wager: MyWager) => {
+  const getStatusBadge = async (wager: MyWager) => {
     if (wager.status === "open") {
       return <Badge variant="secondary">Waiting for opponent</Badge>;
     }
     if (wager.status === "active") {
+      // Check if user has already uploaded proof
+      const { data } = await supabase
+        .from("wager_proofs")
+        .select("status")
+        .eq("wager_id", wager.id)
+        .eq("user_id", userId)
+        .single();
+
+      if (data) {
+        return <Badge variant="outline">{data.status === "pending" ? "Proof submitted" : data.status}</Badge>;
+      }
       return <Badge>Match in progress</Badge>;
     }
     if (wager.status === "pending_verification") {
@@ -82,6 +94,21 @@ export const MyWagersTab = ({ userId, onBalanceUpdate }: MyWagersTabProps) => {
     return <Badge>{wager.status}</Badge>;
   };
 
+  const [statusBadges, setStatusBadges] = useState<{ [key: string]: JSX.Element }>({});
+
+  useEffect(() => {
+    const loadBadges = async () => {
+      const badges: { [key: string]: JSX.Element } = {};
+      for (const wager of myWagers) {
+        badges[wager.id] = await getStatusBadge(wager);
+      }
+      setStatusBadges(badges);
+    };
+    if (myWagers.length > 0) {
+      loadBadges();
+    }
+  }, [myWagers]);
+
   return (
     <div className="space-y-4">
       <h2 className="text-2xl font-bold">My Wagers</h2>
@@ -95,9 +122,14 @@ export const MyWagersTab = ({ userId, onBalanceUpdate }: MyWagersTabProps) => {
             <Card key={wager.id} className="p-6 bg-gradient-card border-border">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="flex-1 space-y-2">
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-bold text-lg">{wager.game_type}</h3>
-                    {getStatusBadge(wager)}
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-bold text-lg">{wager.game_type}</h3>
+                      {statusBadges[wager.id]}
+                    </div>
+                    <Badge variant="outline" className="font-mono w-fit">
+                      Code: {wager.wager_code}
+                    </Badge>
                   </div>
                   
                   <div className="flex flex-wrap gap-2">

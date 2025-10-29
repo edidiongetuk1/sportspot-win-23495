@@ -1,0 +1,335 @@
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
+import { CheckCircle, XCircle, Eye } from "lucide-react";
+import { format } from "date-fns";
+
+interface WagerProof {
+  id: string;
+  wager_id: string;
+  user_id: string;
+  screenshot_url: string;
+  status: string;
+  submitted_at: string;
+  admin_notes: string | null;
+}
+
+interface WagerDetails {
+  id: string;
+  game_type: string;
+  stake_amount: number;
+  player_a_id: string;
+  player_b_id: string;
+  status: string;
+  wager_code: string;
+}
+
+interface ProofWithDetails extends WagerProof {
+  wager: WagerDetails;
+  profiles: {
+    email: string;
+  };
+}
+
+export const AdminVerificationPanel = () => {
+  const [pendingProofs, setPendingProofs] = useState<ProofWithDetails[]>([]);
+  const [selectedProof, setSelectedProof] = useState<string | null>(null);
+  const [adminNotes, setAdminNotes] = useState("");
+  const { toast } = useToast();
+
+  useEffect(() => {
+    fetchPendingProofs();
+    
+    // Set up realtime subscription
+    const channel = supabase
+      .channel('wager-proofs-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'wager_proofs'
+        },
+        () => {
+          fetchPendingProofs();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  const fetchPendingProofs = async () => {
+    const { data, error } = await supabase
+      .from("wager_proofs")
+      .select(`
+        *,
+        wager:mobile_wagers(*),
+        profiles(email)
+      `)
+      .eq("status", "pending")
+      .order("submitted_at", { ascending: true });
+
+    if (!error && data) {
+      setPendingProofs(data as any);
+    }
+  };
+
+  const handleVerifyProof = async (proofId: string, wagerId: string, userId: string, approved: boolean) => {
+    try {
+      // Update proof status
+      const { error: proofError } = await supabase
+        .from("wager_proofs")
+        .update({
+          status: approved ? "approved" : "rejected",
+          admin_notes: adminNotes || null,
+        })
+        .eq("id", proofId);
+
+      if (proofError) throw proofError;
+
+      if (approved) {
+        // Get wager details
+        const { data: wager, error: wagerError } = await supabase
+          .from("mobile_wagers")
+          .select("*")
+          .eq("id", wagerId)
+          .single();
+
+        if (wagerError) throw wagerError;
+
+        // Check if both players have submitted approved proofs
+        const { data: allProofs, error: proofsError } = await supabase
+          .from("wager_proofs")
+          .select("*")
+          .eq("wager_id", wagerId)
+          .eq("status", "approved");
+
+        if (proofsError) throw proofsError;
+
+        // If both proofs approved, need to determine winner
+        if (allProofs && allProofs.length === 2) {
+          toast({
+            title: "Both proofs submitted",
+            description: "Review both screenshots to determine the winner",
+          });
+        } else {
+          // Update wager status to pending_verification
+          await supabase
+            .from("mobile_wagers")
+            .update({ status: "pending_verification" })
+            .eq("id", wagerId);
+        }
+      }
+
+      toast({
+        title: approved ? "Proof approved" : "Proof rejected",
+        description: approved 
+          ? "The proof has been verified" 
+          : "The proof has been rejected",
+      });
+
+      fetchPendingProofs();
+      setAdminNotes("");
+      setSelectedProof(null);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update proof status",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeclareWinner = async (wagerId: string, winnerId: string) => {
+    try {
+      // Get wager details
+      const { data: wager, error: wagerError } = await supabase
+        .from("mobile_wagers")
+        .select("*")
+        .eq("id", wagerId)
+        .single();
+
+      if (wagerError) throw wagerError;
+
+      // Update wager with winner
+      const { error: updateError } = await supabase
+        .from("mobile_wagers")
+        .update({
+          winner_id: winnerId,
+          status: "completed",
+        })
+        .eq("id", wagerId);
+
+      if (updateError) throw updateError;
+
+      // Calculate winnings (stake * 2)
+      const winnings = Number(wager.stake_amount) * 2;
+
+      // Get winner's current balance
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("balance")
+        .eq("id", winnerId)
+        .single();
+
+      if (profileError) throw profileError;
+
+      // Update winner's balance
+      const { error: balanceError } = await supabase
+        .from("profiles")
+        .update({ balance: Number(profile.balance) + winnings })
+        .eq("id", winnerId);
+
+      if (balanceError) throw balanceError;
+
+      // Record transaction
+      await supabase.from("wager_transactions").insert({
+        wager_id: wagerId,
+        user_id: winnerId,
+        type: "win",
+        amount: winnings,
+      });
+
+      toast({
+        title: "Winner declared!",
+        description: `₦${winnings.toFixed(2)} has been credited to the winner`,
+      });
+
+      fetchPendingProofs();
+    } catch (error) {
+      console.error("Error declaring winner:", error);
+      toast({
+        title: "Error",
+        description: "Failed to declare winner",
+        variant: "destructive",
+      });
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <h2 className="text-2xl font-bold">Pending Verifications</h2>
+      
+      {pendingProofs.length === 0 ? (
+        <Card className="p-8 text-center">
+          <p className="text-muted-foreground">No pending verifications</p>
+        </Card>
+      ) : (
+        <div className="grid gap-4">
+          {pendingProofs.map((proof) => (
+            <Card key={proof.id} className="p-6 bg-gradient-card border-border">
+              <div className="space-y-4">
+                <div className="flex flex-col md:flex-row justify-between gap-4">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-bold text-lg">{proof.wager.game_type}</h3>
+                      <Badge variant="secondary">
+                        Code: {proof.wager.wager_code}
+                      </Badge>
+                    </div>
+                    
+                    <div className="flex gap-2">
+                      <Badge variant="outline">
+                        Stake: ₦{Number(proof.wager.stake_amount).toFixed(2)}
+                      </Badge>
+                      <Badge>{proof.status}</Badge>
+                    </div>
+
+                    <p className="text-sm text-muted-foreground">
+                      Submitted by: {proof.profiles.email}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {format(new Date(proof.submitted_at), "PPp")}
+                    </p>
+                  </div>
+
+                  <div className="flex flex-col gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => window.open(proof.screenshot_url, "_blank")}
+                    >
+                      <Eye className="w-4 h-4 mr-2" />
+                      View Screenshot
+                    </Button>
+                  </div>
+                </div>
+
+                {selectedProof === proof.id && (
+                  <div className="space-y-3 border-t pt-4">
+                    <Textarea
+                      placeholder="Admin notes (optional)"
+                      value={adminNotes}
+                      onChange={(e) => setAdminNotes(e.target.value)}
+                      rows={3}
+                    />
+                    <div className="flex gap-2">
+                      <Button
+                        variant="default"
+                        onClick={() => handleVerifyProof(proof.id, proof.wager_id, proof.user_id, true)}
+                        className="bg-green-500 hover:bg-green-600"
+                      >
+                        <CheckCircle className="w-4 h-4 mr-2" />
+                        Approve
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        onClick={() => handleVerifyProof(proof.id, proof.wager_id, proof.user_id, false)}
+                      >
+                        <XCircle className="w-4 h-4 mr-2" />
+                        Reject
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setSelectedProof(null);
+                          setAdminNotes("");
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+
+                    <div className="space-y-2 border-t pt-3">
+                      <p className="font-semibold">Declare Winner:</p>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          onClick={() => handleDeclareWinner(proof.wager_id, proof.wager.player_a_id)}
+                        >
+                          Player A Wins
+                        </Button>
+                        <Button
+                          size="sm"
+                          onClick={() => handleDeclareWinner(proof.wager_id, proof.wager.player_b_id)}
+                        >
+                          Player B Wins
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {selectedProof !== proof.id && (
+                  <Button
+                    variant="bet"
+                    onClick={() => setSelectedProof(proof.id)}
+                  >
+                    Review & Verify
+                  </Button>
+                )}
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};

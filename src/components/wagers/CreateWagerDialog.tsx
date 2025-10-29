@@ -45,6 +45,10 @@ export const CreateWagerDialog = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
+  const generateWagerCode = () => {
+    return Math.random().toString(36).substring(2, 8).toUpperCase();
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -73,6 +77,9 @@ export const CreateWagerDialog = ({
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
+      // Generate unique wager code
+      const wagerCode = generateWagerCode();
+
       // Create wager
       const expiresAt = new Date();
       expiresAt.setHours(expiresAt.getHours() + 24); // Expires in 24 hours
@@ -84,6 +91,7 @@ export const CreateWagerDialog = ({
           game_type: gameType,
           stake_amount: amount,
           expires_at: expiresAt.toISOString(),
+          wager_code: wagerCode,
         });
 
       if (wagerError) throw wagerError;
@@ -98,7 +106,8 @@ export const CreateWagerDialog = ({
 
       toast({
         title: "Wager created!",
-        description: "Waiting for another player to join",
+        description: `Share this code: ${wagerCode}`,
+        duration: 10000,
       });
 
       onWagerCreated();

@@ -195,6 +195,7 @@ export type Database = {
           player_b_id: string | null
           stake_amount: number
           status: string
+          wager_code: string | null
           winner_id: string | null
         }
         Insert: {
@@ -207,6 +208,7 @@ export type Database = {
           player_b_id?: string | null
           stake_amount: number
           status?: string
+          wager_code?: string | null
           winner_id?: string | null
         }
         Update: {
@@ -219,6 +221,7 @@ export type Database = {
           player_b_id?: string | null
           stake_amount?: number
           status?: string
+          wager_code?: string | null
           winner_id?: string | null
         }
         Relationships: []

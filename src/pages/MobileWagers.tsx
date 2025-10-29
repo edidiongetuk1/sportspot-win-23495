@@ -10,7 +10,8 @@ import { User } from "@supabase/supabase-js";
 import { CreateWagerDialog } from "@/components/wagers/CreateWagerDialog";
 import { WagerCard } from "@/components/wagers/WagerCard";
 import { MyWagersTab } from "@/components/wagers/MyWagersTab";
-import { Trophy, Target, Upload } from "lucide-react";
+import { AdminVerificationPanel } from "@/components/wagers/AdminVerificationPanel";
+import { Trophy, Target } from "lucide-react";
 
 interface Wager {
   id: string;
@@ -21,6 +22,7 @@ interface Wager {
   status: string;
   created_at: string;
   expires_at: string;
+  wager_code: string;
 }
 
 const MobileWagers = () => {
@@ -91,7 +93,7 @@ const MobileWagers = () => {
     }
   };
 
-  const handleJoinWager = async (wagerId: string, stakeAmount: number) => {
+  const handleJoinWager = async (wagerId: string, stakeAmount: number, code: string) => {
     if (!user) {
       toast({
         title: "Authentication required",
@@ -231,8 +233,7 @@ const MobileWagers = () => {
 
           {isAdmin && (
             <TabsContent value="admin">
-              <h2 className="text-2xl font-bold mb-4">Pending Verifications</h2>
-              <p className="text-muted-foreground">Admin verification panel coming soon</p>
+              <AdminVerificationPanel />
             </TabsContent>
           )}
         </Tabs>
