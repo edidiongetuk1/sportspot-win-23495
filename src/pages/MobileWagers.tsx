@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
@@ -29,6 +30,8 @@ const MobileWagers = () => {
   const [user, setUser] = useState<User | null>(null);
   const [balance, setBalance] = useState(0);
   const [openWagers, setOpenWagers] = useState<Wager[]>([]);
+  const [filteredWagers, setFilteredWagers] = useState<Wager[]>([]);
+  const [searchCode, setSearchCode] = useState("");
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const navigate = useNavigate();
@@ -90,8 +93,20 @@ const MobileWagers = () => {
 
     if (!error && data) {
       setOpenWagers(data);
+      setFilteredWagers(data);
     }
   };
+
+  useEffect(() => {
+    if (searchCode.trim() === "") {
+      setFilteredWagers(openWagers);
+    } else {
+      const filtered = openWagers.filter(wager => 
+        wager.wager_code.toLowerCase().includes(searchCode.toLowerCase())
+      );
+      setFilteredWagers(filtered);
+    }
+  }, [searchCode, openWagers]);
 
   const handleJoinWager = async (wagerId: string, stakeAmount: number, code: string) => {
     if (!user) {
@@ -201,10 +216,24 @@ const MobileWagers = () => {
           </TabsList>
 
           <TabsContent value="open" className="space-y-4">
-            <h2 className="text-2xl font-bold mb-4">Available Wagers</h2>
-            {openWagers.length === 0 ? (
+            <div className="flex flex-col md:flex-row gap-4 mb-6">
+              <div className="flex-1">
+                <h2 className="text-2xl font-bold mb-2">Available Wagers</h2>
+              </div>
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Search by code..."
+                  value={searchCode}
+                  onChange={(e) => setSearchCode(e.target.value)}
+                  className="max-w-xs"
+                />
+              </div>
+            </div>
+            {filteredWagers.length === 0 ? (
               <Card className="p-8 text-center">
-                <p className="text-muted-foreground">No open wagers available</p>
+                <p className="text-muted-foreground">
+                  {searchCode ? "No wagers found with that code" : "No open wagers available"}
+                </p>
                 <Button 
                   className="mt-4"
                   onClick={() => setShowCreateDialog(true)}
@@ -215,7 +244,7 @@ const MobileWagers = () => {
               </Card>
             ) : (
               <div className="grid gap-4">
-                {openWagers.map((wager) => (
+                {filteredWagers.map((wager) => (
                   <WagerCard
                     key={wager.id}
                     wager={wager}
