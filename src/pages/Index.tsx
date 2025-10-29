@@ -4,12 +4,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/Navbar";
 import { MatchCard } from "@/components/MatchCard";
 import { BetSlip } from "@/components/BetSlip";
+import { MyBetsTab } from "@/components/MyBetsTab";
+import { UploadBetSlipDialog } from "@/components/UploadBetSlipDialog";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { User, Session } from "@supabase/supabase-js";
 import heroImage from "@/assets/hero-sports.jpg";
 import { format } from "date-fns";
+import { Upload } from "lucide-react";
 
 interface Bet {
   id: string;
@@ -37,6 +40,8 @@ const Index = () => {
   const [balance, setBalance] = useState(0);
   const [matches, setMatches] = useState<Match[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("football");
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -241,9 +246,10 @@ const Index = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Matches Section */}
           <div className="lg:col-span-2 space-y-6">
-            <Tabs defaultValue="football" className="w-full">
-              <TabsList className="w-full justify-start bg-card border border-border">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="w-full justify-start bg-card border border-border overflow-x-auto">
                 <TabsTrigger value="football">Football</TabsTrigger>
+                <TabsTrigger value="my-bets">My Bets</TabsTrigger>
                 <TabsTrigger value="basketball">Basketball</TabsTrigger>
                 <TabsTrigger value="tennis">Tennis</TabsTrigger>
                 <TabsTrigger value="live">Live Now</TabsTrigger>
@@ -251,7 +257,19 @@ const Index = () => {
               </TabsList>
 
               <TabsContent value="football" className="space-y-4 mt-6">
-                <h2 className="text-2xl font-bold">Featured Matches</h2>
+                <div className="flex items-center justify-between">
+                  <h2 className="text-2xl font-bold">Featured Matches</h2>
+                  {user && (
+                    <Button
+                      variant="bet"
+                      onClick={() => setIsUploadDialogOpen(true)}
+                      className="gap-2"
+                    >
+                      <Upload className="w-4 h-4" />
+                      Upload Bet Slip
+                    </Button>
+                  )}
+                </div>
                 {matches.length === 0 ? (
                   <p className="text-muted-foreground">No matches available</p>
                 ) : (
@@ -272,6 +290,10 @@ const Index = () => {
                     ))}
                   </div>
                 )}
+              </TabsContent>
+
+              <TabsContent value="my-bets" className="space-y-4 mt-6">
+                <MyBetsTab userId={user?.id} />
               </TabsContent>
 
               <TabsContent value="basketball" className="space-y-4 mt-6">
@@ -303,6 +325,14 @@ const Index = () => {
           </div>
         </div>
       </div>
+
+      <UploadBetSlipDialog
+        isOpen={isUploadDialogOpen}
+        onClose={() => setIsUploadDialogOpen(false)}
+        onUploadComplete={() => {
+          setActiveTab("my-bets");
+        }}
+      />
     </div>
   );
 };
