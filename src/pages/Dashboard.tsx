@@ -20,6 +20,25 @@ interface Bet {
   created_at: string;
 }
 
+interface Wager {
+  id: string;
+  game_type: string;
+  stake_amount: number;
+  status: string;
+  created_at: string;
+  player_a_id: string;
+  player_b_id: string | null;
+  winner_id: string | null;
+}
+
+interface Transaction {
+  id: string;
+  type: string;
+  amount: number;
+  created_at: string;
+  wager_id: string;
+}
+
 interface Profile {
   balance: number;
 }
@@ -28,6 +47,8 @@ export default function Dashboard() {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [bets, setBets] = useState<Bet[]>([]);
+  const [wagers, setWagers] = useState<Wager[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -40,6 +61,8 @@ export default function Dashboard() {
         setUser(session.user);
         fetchProfile(session.user.id);
         fetchBets(session.user.id);
+        fetchWagers(session.user.id);
+        fetchTransactions(session.user.id);
       }
     });
 
@@ -50,6 +73,8 @@ export default function Dashboard() {
         setUser(session.user);
         fetchProfile(session.user.id);
         fetchBets(session.user.id);
+        fetchWagers(session.user.id);
+        fetchTransactions(session.user.id);
       }
     });
 
@@ -93,6 +118,36 @@ export default function Dashboard() {
     }
   };
 
+  const fetchWagers = async (userId: string) => {
+    const { data, error } = await supabase
+      .from("mobile_wagers")
+      .select("*")
+      .or(`player_a_id.eq.${userId},player_b_id.eq.${userId}`)
+      .order("created_at", { ascending: false })
+      .limit(10);
+
+    if (error) {
+      console.error("Failed to fetch wagers:", error);
+    } else {
+      setWagers(data || []);
+    }
+  };
+
+  const fetchTransactions = async (userId: string) => {
+    const { data, error } = await supabase
+      .from("wager_transactions")
+      .select("*")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(20);
+
+    if (error) {
+      console.error("Failed to fetch transactions:", error);
+    } else {
+      setTransactions(data || []);
+    }
+  };
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     navigate("/auth");
@@ -123,7 +178,7 @@ export default function Dashboard() {
           <p className="text-muted-foreground">Welcome back, {user?.email}</p>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-3 mb-8">
+        <div className="grid gap-6 md:grid-cols-4 mb-8">
           <Card className="p-6">
             <p className="text-sm text-muted-foreground mb-2">Current Balance</p>
             <p className="text-3xl font-bold text-accent">₦{profile?.balance.toFixed(2)}</p>
@@ -133,11 +188,100 @@ export default function Dashboard() {
             <p className="text-3xl font-bold">{bets.length}</p>
           </Card>
           <Card className="p-6">
+            <p className="text-sm text-muted-foreground mb-2">Active Wagers</p>
+            <p className="text-3xl font-bold">
+              {wagers.filter(w => w.status === 'open' || w.status === 'pending').length}
+            </p>
+          </Card>
+          <Card className="p-6">
             <p className="text-sm text-muted-foreground mb-2">Pending Bets</p>
             <p className="text-3xl font-bold">
               {bets.filter(bet => bet.status === 'pending').length}
             </p>
           </Card>
+        </div>
+
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold mb-4">Active Wagers</h2>
+          {wagers.length === 0 ? (
+            <Card className="p-8 text-center">
+              <p className="text-muted-foreground">No wagers yet</p>
+            </Card>
+          ) : (
+            <div className="space-y-4">
+              {wagers.slice(0, 5).map((wager) => (
+                <Card key={wager.id} className="p-6">
+                  <div className="flex justify-between items-start mb-2">
+                    <div>
+                      <p className="font-bold text-lg">{wager.game_type}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {format(new Date(wager.created_at), "MMM d, yyyy HH:mm")}
+                      </p>
+                    </div>
+                    <Badge variant={
+                      wager.status === 'completed' ? 
+                        (wager.winner_id === user?.id ? 'default' : 'destructive') :
+                      wager.status === 'draw' ? 'secondary' :
+                      'outline'
+                    }>
+                      {wager.status === 'completed' && wager.winner_id === user?.id ? 'Won' :
+                       wager.status === 'completed' ? 'Lost' :
+                       wager.status === 'draw' ? 'Draw' :
+                       wager.status}
+                    </Badge>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Stake Amount</p>
+                      <p className="font-bold">₦{wager.stake_amount.toFixed(2)}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Potential Win</p>
+                      <p className="font-bold text-accent">₦{(wager.stake_amount * 2).toFixed(2)}</p>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold mb-4">Recent Transactions</h2>
+          {transactions.length === 0 ? (
+            <Card className="p-8 text-center">
+              <p className="text-muted-foreground">No transactions yet</p>
+            </Card>
+          ) : (
+            <div className="space-y-2">
+              {transactions.map((transaction) => (
+                <Card key={transaction.id} className="p-4">
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-3">
+                      <Badge variant={
+                        transaction.type === 'win' || transaction.type === 'refund' ? 'default' :
+                        transaction.type === 'stake' || transaction.type === 'loss' ? 'destructive' :
+                        'secondary'
+                      }>
+                        {transaction.type}
+                      </Badge>
+                      <p className="text-sm text-muted-foreground">
+                        {format(new Date(transaction.created_at), "MMM d, HH:mm")}
+                      </p>
+                    </div>
+                    <p className={`font-bold ${
+                      transaction.type === 'win' || transaction.type === 'refund' ? 'text-green-500' : 
+                      transaction.type === 'stake' || transaction.type === 'loss' ? 'text-red-500' : 
+                      ''
+                    }`}>
+                      {transaction.type === 'win' || transaction.type === 'refund' ? '+' : '-'}
+                      ₦{Math.abs(transaction.amount).toFixed(2)}
+                    </p>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
 
         <div>
