@@ -36,6 +36,77 @@ export const MyWagersTab = ({ userId, onBalanceUpdate }: MyWagersTabProps) => {
     }
   }, [userId]);
 
+  // Real-time subscription for wager updates
+  useEffect(() => {
+    if (!userId) return;
+
+    const channel = supabase
+      .channel('my-wagers-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'mobile_wagers',
+          filter: `player_a_id=eq.${userId},player_b_id=eq.${userId}`
+        },
+        (payload) => {
+          console.log('My wager update received:', payload);
+          const newStatus = payload.new?.status;
+          
+          if (newStatus === 'completed') {
+            const isWinner = payload.new?.winner_id === userId;
+            toast({
+              title: isWinner ? "🎉 You Won!" : "Match Complete",
+              description: isWinner 
+                ? "Winnings have been credited to your account" 
+                : "The match has been completed",
+              variant: isWinner ? "default" : "destructive",
+            });
+          } else if (newStatus === 'active') {
+            toast({
+              title: "Match Started!",
+              description: "Your opponent has joined the wager",
+            });
+          }
+          fetchMyWagers();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'wager_proofs',
+          filter: `user_id=eq.${userId}`
+        },
+        (payload) => {
+          console.log('Wager proof update received:', payload);
+          if (payload.eventType === 'UPDATE') {
+            const status = payload.new?.status;
+            if (status === 'approved') {
+              toast({
+                title: "✅ Proof Approved",
+                description: "Admin has verified your screenshot",
+              });
+            } else if (status === 'rejected') {
+              toast({
+                title: "❌ Proof Rejected",
+                description: payload.new?.admin_notes || "Please upload a clearer screenshot",
+                variant: "destructive",
+              });
+            }
+          }
+          fetchMyWagers();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [userId]);
+
   const fetchMyWagers = async () => {
     if (!userId) return;
 

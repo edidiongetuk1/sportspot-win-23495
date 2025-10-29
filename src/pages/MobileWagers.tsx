@@ -111,6 +111,29 @@ const MobileWagers = () => {
     }
   };
 
+  // Real-time subscription for wagers
+  useEffect(() => {
+    const channel = supabase
+      .channel('mobile-wagers-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'mobile_wagers'
+        },
+        (payload) => {
+          console.log('Wager update received:', payload);
+          fetchOpenWagers();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
   useEffect(() => {
     if (searchCode.trim() === "") {
       setFilteredWagers(openWagers);

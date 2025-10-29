@@ -64,7 +64,14 @@ export const AdminVerificationPanel = () => {
           schema: 'public',
           table: 'wager_proofs'
         },
-        () => {
+        (payload) => {
+          console.log('Proof update received:', payload);
+          if (payload.eventType === 'INSERT') {
+            toast({
+              title: "🔔 New Proof Submitted",
+              description: "A user has uploaded a new wager result",
+            });
+          }
           fetchPendingProofs();
         }
       )
