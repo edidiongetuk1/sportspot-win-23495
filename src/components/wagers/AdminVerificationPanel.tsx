@@ -16,6 +16,16 @@ interface WagerProof {
   status: string;
   submitted_at: string;
   admin_notes: string | null;
+  game_name: string | null;
+  ai_verification_result: {
+    players_detected?: string[];
+    score?: string;
+    confidence?: string;
+    details?: string;
+    is_valid_proof?: boolean;
+    reason?: string;
+  } | null;
+  verified_at: string | null;
 }
 
 interface WagerDetails {
@@ -73,7 +83,7 @@ export const AdminVerificationPanel = () => {
         wager:mobile_wagers(*),
         profiles(email)
       `)
-      .eq("status", "pending")
+      .in("status", ["pending", "ai_verified", "ai_failed"])
       .order("submitted_at", { ascending: true });
 
     if (!error && data) {
@@ -225,7 +235,7 @@ export const AdminVerificationPanel = () => {
         <div className="grid gap-4">
           {pendingProofs.map((proof) => (
             <Card key={proof.id} className="p-6 bg-gradient-card border-border">
-              <div className="space-y-4">
+                <div className="space-y-4">
                 <div className="flex flex-col md:flex-row justify-between gap-4">
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
@@ -235,11 +245,21 @@ export const AdminVerificationPanel = () => {
                       </Badge>
                     </div>
                     
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 flex-wrap">
                       <Badge variant="outline">
                         Stake: ₦{Number(proof.wager.stake_amount).toFixed(2)}
                       </Badge>
-                      <Badge>{proof.status}</Badge>
+                      <Badge className={
+                        proof.status === 'ai_verified' ? 'bg-green-500' :
+                        proof.status === 'ai_failed' ? 'bg-red-500' : ''
+                      }>
+                        {proof.status}
+                      </Badge>
+                      {proof.game_name && (
+                        <Badge variant="outline">
+                          Game: {proof.game_name}
+                        </Badge>
+                      )}
                     </div>
 
                     <p className="text-sm text-muted-foreground">
@@ -248,6 +268,37 @@ export const AdminVerificationPanel = () => {
                     <p className="text-sm text-muted-foreground">
                       {format(new Date(proof.submitted_at), "PPp")}
                     </p>
+
+                    {/* AI Verification Results */}
+                    {proof.ai_verification_result && (
+                      <div className="mt-3 p-3 bg-muted rounded-lg space-y-2">
+                        <p className="font-semibold text-sm">AI Analysis:</p>
+                        <div className="text-xs space-y-1">
+                          {proof.ai_verification_result.score && (
+                            <p><strong>Score:</strong> {proof.ai_verification_result.score}</p>
+                          )}
+                          {proof.ai_verification_result.players_detected && proof.ai_verification_result.players_detected.length > 0 && (
+                            <p><strong>Players:</strong> {proof.ai_verification_result.players_detected.join(", ")}</p>
+                          )}
+                          {proof.ai_verification_result.confidence && (
+                            <p><strong>Confidence:</strong> 
+                              <Badge variant={
+                                proof.ai_verification_result.confidence === 'high' ? 'default' :
+                                proof.ai_verification_result.confidence === 'medium' ? 'secondary' : 'destructive'
+                              } className="ml-2">
+                                {proof.ai_verification_result.confidence}
+                              </Badge>
+                            </p>
+                          )}
+                          {proof.ai_verification_result.details && (
+                            <p><strong>Details:</strong> {proof.ai_verification_result.details}</p>
+                          )}
+                          {proof.ai_verification_result.reason && (
+                            <p className="text-muted-foreground italic">{proof.ai_verification_result.reason}</p>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex flex-col gap-2">

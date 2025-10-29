@@ -274,29 +274,38 @@ export type Database = {
       wager_proofs: {
         Row: {
           admin_notes: string | null
+          ai_verification_result: Json | null
+          game_name: string | null
           id: string
           screenshot_url: string
           status: string
           submitted_at: string
           user_id: string
+          verified_at: string | null
           wager_id: string
         }
         Insert: {
           admin_notes?: string | null
+          ai_verification_result?: Json | null
+          game_name?: string | null
           id?: string
           screenshot_url: string
           status?: string
           submitted_at?: string
           user_id: string
+          verified_at?: string | null
           wager_id: string
         }
         Update: {
           admin_notes?: string | null
+          ai_verification_result?: Json | null
+          game_name?: string | null
           id?: string
           screenshot_url?: string
           status?: string
           submitted_at?: string
           user_id?: string
+          verified_at?: string | null
           wager_id?: string
         }
         Relationships: [
