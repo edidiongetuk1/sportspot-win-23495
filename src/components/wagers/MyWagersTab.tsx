@@ -137,12 +137,14 @@ export const MyWagersTab = ({ userId, onBalanceUpdate }: MyWagersTabProps) => {
       return <Badge variant="secondary">Waiting for opponent</Badge>;
     }
     if (wager.status === "active") {
-      // Check if user has already uploaded proof
+      // Check if user has already uploaded proof (get most recent)
       const { data, error } = await supabase
         .from("wager_proofs")
         .select("status")
         .eq("wager_id", wager.id)
         .eq("user_id", userId)
+        .order("submitted_at", { ascending: false })
+        .limit(1)
         .maybeSingle();
 
       if (error) {
