@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
@@ -243,16 +244,21 @@ const MobileWagers = () => {
             <p className="text-xl text-muted-foreground">
               Challenge other players to 1v1 matches and win real money
             </p>
-            <div className="flex gap-4 justify-center">
-              <Button 
-                variant="bet" 
-                size="lg"
-                onClick={() => setShowCreateDialog(true)}
-                disabled={!user}
-              >
-                <Target className="w-4 h-4 mr-2" />
-                Create Wager
-              </Button>
+            <div className="flex flex-col gap-2 items-center">
+              <div className="flex gap-4 justify-center">
+                <Button 
+                  variant="bet" 
+                  size="lg"
+                  onClick={() => setShowCreateDialog(true)}
+                  disabled={!user}
+                >
+                  <Target className="w-4 h-4 mr-2" />
+                  Create Wager
+                </Button>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Upload match results in "My Wagers" tab after match completes
+              </p>
             </div>
           </div>
         </div>
@@ -263,7 +269,10 @@ const MobileWagers = () => {
         <Tabs defaultValue="open" className="w-full">
           <TabsList className="w-full justify-start bg-card border border-border mb-6">
             <TabsTrigger value="open">Open Wagers</TabsTrigger>
-            <TabsTrigger value="mywagers">My Wagers</TabsTrigger>
+            <TabsTrigger value="mywagers">
+              My Wagers
+              <Badge variant="secondary" className="ml-2">Upload Here</Badge>
+            </TabsTrigger>
             {isAdmin && <TabsTrigger value="admin">Admin Panel</TabsTrigger>}
           </TabsList>
 
