@@ -89,7 +89,7 @@ export const AdminVerificationPanel = () => {
         *,
         mobile_wagers!wager_id(*)
       `)
-      .in("status", ["pending", "ai_verified", "ai_failed"])
+      .in("status", ["pending", "ai_verified", "ai_failed", "approved"])
       .order("submitted_at", { ascending: true });
 
     if (error) {
@@ -110,12 +110,17 @@ export const AdminVerificationPanel = () => {
         .select("id, email")
         .in("id", userIds);
 
-      // Combine the data
-      const proofsWithDetails = data.map(proof => ({
-        ...proof,
-        wager: proof.mobile_wagers,
-        profiles: profiles?.find(p => p.id === proof.user_id) || { email: 'Unknown' }
-      }));
+      // Combine the data and filter out proofs from completed/draw wagers
+      const proofsWithDetails = data
+        .filter(proof => {
+          const wager = proof.mobile_wagers;
+          return wager && wager.status !== 'completed' && wager.status !== 'draw';
+        })
+        .map(proof => ({
+          ...proof,
+          wager: proof.mobile_wagers,
+          profiles: profiles?.find(p => p.id === proof.user_id) || { email: 'Unknown' }
+        }));
 
       setPendingProofs(proofsWithDetails as any);
     }

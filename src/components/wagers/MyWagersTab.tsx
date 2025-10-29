@@ -22,7 +22,7 @@ interface MyWager {
 
 interface MyWagersTabProps {
   userId?: string;
-  onBalanceUpdate: (balance: number) => void;
+  onBalanceUpdate: () => void;
 }
 
 export const MyWagersTab = ({ userId, onBalanceUpdate }: MyWagersTabProps) => {
@@ -48,21 +48,34 @@ export const MyWagersTab = ({ userId, onBalanceUpdate }: MyWagersTabProps) => {
           event: 'UPDATE',
           schema: 'public',
           table: 'mobile_wagers',
-          filter: `player_a_id=eq.${userId},player_b_id=eq.${userId}`
         },
         (payload) => {
           console.log('My wager update received:', payload);
+          
+          // Check if this wager involves the current user
+          const isMyWager = payload.new?.player_a_id === userId || payload.new?.player_b_id === userId;
+          if (!isMyWager) return;
+
           const newStatus = payload.new?.status;
           
           if (newStatus === 'completed') {
             const isWinner = payload.new?.winner_id === userId;
             toast({
-              title: isWinner ? "🎉 You Won!" : "Match Complete",
+              title: isWinner ? "🎉 You Won!" : "😔 You Lost",
               description: isWinner 
-                ? "Winnings have been credited to your account" 
-                : "The match has been completed",
+                ? "Winnings have been credited to your account!" 
+                : "Better luck next time",
               variant: isWinner ? "default" : "destructive",
             });
+            // Refresh balance
+            onBalanceUpdate();
+          } else if (newStatus === 'draw') {
+            toast({
+              title: "⚖️ Draw Declared",
+              description: "50% of your stake has been refunded",
+            });
+            // Refresh balance
+            onBalanceUpdate();
           } else if (newStatus === 'active') {
             toast({
               title: "Match Started!",
@@ -155,19 +168,24 @@ export const MyWagersTab = ({ userId, onBalanceUpdate }: MyWagersTabProps) => {
         const statusText = data.status === "pending" ? "Proof submitted" : 
                           data.status === "ai_verified" ? "AI Verified" :
                           data.status === "ai_failed" ? "Needs manual review" :
+                          data.status === "approved" ? "Approved - Awaiting result" :
+                          data.status === "rejected" ? "Rejected" :
                           data.status;
         return <Badge variant="outline">{statusText}</Badge>;
       }
       return <Badge>Match in progress</Badge>;
     }
     if (wager.status === "pending_verification") {
-      return <Badge variant="outline">Pending verification</Badge>;
+      return <Badge variant="outline">Admin reviewing</Badge>;
+    }
+    if (wager.status === "draw") {
+      return <Badge variant="secondary" className="bg-yellow-500/20 text-yellow-700 dark:text-yellow-400">Draw - 50% Refunded</Badge>;
     }
     if (wager.status === "completed") {
       if (wager.winner_id === userId) {
-        return <Badge className="bg-green-500">Won</Badge>;
+        return <Badge className="bg-green-500">Won ✓</Badge>;
       } else {
-        return <Badge variant="destructive">Lost</Badge>;
+        return <Badge variant="destructive">Lost ✗</Badge>;
       }
     }
     return <Badge>{wager.status}</Badge>;
@@ -235,6 +253,11 @@ export const MyWagersTab = ({ userId, onBalanceUpdate }: MyWagersTabProps) => {
                     {wager.status === "completed" && wager.winner_id === userId && (
                       <Badge className="bg-green-500">
                         Won: ₦{(Number(wager.stake_amount) * 2).toFixed(2)}
+                      </Badge>
+                    )}
+                    {wager.status === "draw" && (
+                      <Badge variant="outline" className="bg-yellow-500/10">
+                        Refunded: ₦{(Number(wager.stake_amount) * 0.5).toFixed(2)}
                       </Badge>
                     )}
                   </div>

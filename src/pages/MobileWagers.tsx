@@ -145,6 +145,12 @@ const MobileWagers = () => {
     }
   }, [searchCode, openWagers]);
 
+  const handleBalanceRefresh = () => {
+    if (user) {
+      fetchProfile(user.id);
+    }
+  };
+  
   const handleJoinWager = async (wagerId: string, stakeAmount: number, code: string) => {
     if (!user) {
       toast({
@@ -341,7 +347,7 @@ const MobileWagers = () => {
           </TabsContent>
 
           <TabsContent value="mywagers">
-            <MyWagersTab userId={user?.id} onBalanceUpdate={setBalance} />
+            <MyWagersTab userId={user?.id} onBalanceUpdate={handleBalanceRefresh} />
           </TabsContent>
 
           {isAdmin && (
