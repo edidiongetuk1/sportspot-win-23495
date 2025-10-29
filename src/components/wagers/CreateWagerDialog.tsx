@@ -94,7 +94,10 @@ export const CreateWagerDialog = ({
           wager_code: wagerCode,
         });
 
-      if (wagerError) throw wagerError;
+      if (wagerError) {
+        console.error("Wager creation error:", wagerError);
+        throw wagerError;
+      }
 
       // Deduct stake from balance
       const { error: profileError } = await supabase
@@ -102,11 +105,14 @@ export const CreateWagerDialog = ({
         .update({ balance: userBalance - amount })
         .eq("id", user.id);
 
-      if (profileError) throw profileError;
+      if (profileError) {
+        console.error("Profile update error:", profileError);
+        throw profileError;
+      }
 
       toast({
         title: "Wager created!",
-        description: `Share this code: ${wagerCode}`,
+        description: `Share this code with your opponent: ${wagerCode}`,
         duration: 10000,
       });
 
@@ -114,10 +120,11 @@ export const CreateWagerDialog = ({
       onOpenChange(false);
       setGameType("");
       setStakeAmount("");
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Create wager error:", error);
       toast({
         title: "Error",
-        description: "Failed to create wager",
+        description: error?.message || "Failed to create wager",
         variant: "destructive",
       });
     } finally {

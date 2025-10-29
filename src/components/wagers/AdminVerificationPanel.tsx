@@ -86,7 +86,17 @@ export const AdminVerificationPanel = () => {
       .in("status", ["pending", "ai_verified", "ai_failed"])
       .order("submitted_at", { ascending: true });
 
-    if (!error && data) {
+    if (error) {
+      console.error("Error fetching pending proofs:", error);
+      toast({
+        title: "Error loading proofs",
+        description: "Please refresh the page",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (data) {
       setPendingProofs(data as any);
     }
   };
@@ -99,10 +109,14 @@ export const AdminVerificationPanel = () => {
         .update({
           status: approved ? "approved" : "rejected",
           admin_notes: adminNotes || null,
+          verified_at: new Date().toISOString(),
         })
         .eq("id", proofId);
 
-      if (proofError) throw proofError;
+      if (proofError) {
+        console.error("Proof update error:", proofError);
+        throw proofError;
+      }
 
       if (approved) {
         // Get wager details
@@ -112,7 +126,10 @@ export const AdminVerificationPanel = () => {
           .eq("id", wagerId)
           .single();
 
-        if (wagerError) throw wagerError;
+        if (wagerError) {
+          console.error("Wager fetch error:", wagerError);
+          throw wagerError;
+        }
 
         // Check if both players have submitted approved proofs
         const { data: allProofs, error: proofsError } = await supabase
@@ -121,12 +138,15 @@ export const AdminVerificationPanel = () => {
           .eq("wager_id", wagerId)
           .eq("status", "approved");
 
-        if (proofsError) throw proofsError;
+        if (proofsError) {
+          console.error("Proofs fetch error:", proofsError);
+          throw proofsError;
+        }
 
         // If both proofs approved, need to determine winner
         if (allProofs && allProofs.length === 2) {
           toast({
-            title: "Both proofs submitted",
+            title: "Both proofs approved",
             description: "Review both screenshots to determine the winner",
           });
         } else {
@@ -148,10 +168,11 @@ export const AdminVerificationPanel = () => {
       fetchPendingProofs();
       setAdminNotes("");
       setSelectedProof(null);
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Verify proof error:", error);
       toast({
         title: "Error",
-        description: "Failed to update proof status",
+        description: error?.message || "Failed to update proof status",
         variant: "destructive",
       });
     }

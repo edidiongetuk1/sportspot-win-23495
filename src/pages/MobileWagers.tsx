@@ -74,13 +74,16 @@ const MobileWagers = () => {
   };
 
   const checkAdminRole = async (userId: string) => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("user_roles")
       .select("role")
       .eq("user_id", userId)
       .eq("role", "admin")
-      .single();
+      .maybeSingle();
 
+    if (error) {
+      console.error("Error checking admin role:", error);
+    }
     setIsAdmin(!!data);
   };
 
@@ -91,7 +94,17 @@ const MobileWagers = () => {
       .eq("status", "open")
       .order("created_at", { ascending: false });
 
-    if (!error && data) {
+    if (error) {
+      console.error("Error fetching open wagers:", error);
+      toast({
+        title: "Error loading wagers",
+        description: "Please refresh the page",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (data) {
       setOpenWagers(data);
       setFilteredWagers(data);
     }
@@ -129,6 +142,37 @@ const MobileWagers = () => {
     }
 
     try {
+      // Check if wager is still available
+      const { data: existingWager, error: checkError } = await supabase
+        .from("mobile_wagers")
+        .select("*")
+        .eq("id", wagerId)
+        .single();
+
+      if (checkError || !existingWager) {
+        throw new Error("Wager not found");
+      }
+
+      if (existingWager.status !== "open") {
+        toast({
+          title: "Wager unavailable",
+          description: "This wager has already been joined",
+          variant: "destructive",
+        });
+        fetchOpenWagers();
+        return;
+      }
+
+      if (existingWager.player_b_id) {
+        toast({
+          title: "Already joined",
+          description: "Someone else has joined this wager",
+          variant: "destructive",
+        });
+        fetchOpenWagers();
+        return;
+      }
+
       // Update wager status
       const { error: wagerError } = await supabase
         .from("mobile_wagers")
@@ -136,9 +180,13 @@ const MobileWagers = () => {
           player_b_id: user.id,
           status: "active"
         })
-        .eq("id", wagerId);
+        .eq("id", wagerId)
+        .eq("status", "open"); // Extra check
 
-      if (wagerError) throw wagerError;
+      if (wagerError) {
+        console.error("Wager update error:", wagerError);
+        throw wagerError;
+      }
 
       // Deduct stake from balance
       const newBalance = balance - stakeAmount;
@@ -147,7 +195,10 @@ const MobileWagers = () => {
         .update({ balance: newBalance })
         .eq("id", user.id);
 
-      if (profileError) throw profileError;
+      if (profileError) {
+        console.error("Profile update error:", profileError);
+        throw profileError;
+      }
 
       setBalance(newBalance);
       fetchOpenWagers();
@@ -156,10 +207,11 @@ const MobileWagers = () => {
         title: "Wager joined!",
         description: "Play your match and upload the result screenshot",
       });
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Join wager error:", error);
       toast({
         title: "Error",
-        description: "Failed to join wager",
+        description: error?.message || "Failed to join wager",
         variant: "destructive",
       });
     }

@@ -45,23 +45,21 @@ export const MyWagersTab = ({ userId, onBalanceUpdate }: MyWagersTabProps) => {
       .or(`player_a_id.eq.${userId},player_b_id.eq.${userId}`)
       .order("created_at", { ascending: false });
 
-    if (!error && data) {
+    if (error) {
+      console.error("Error fetching my wagers:", error);
+      toast({
+        title: "Error loading your wagers",
+        description: "Please refresh the page",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (data) {
       setMyWagers(data);
     }
   };
 
-  const checkProofStatus = async (wagerId: string) => {
-    if (!userId) return null;
-
-    const { data } = await supabase
-      .from("wager_proofs")
-      .select("status")
-      .eq("wager_id", wagerId)
-      .eq("user_id", userId)
-      .single();
-
-    return data?.status || null;
-  };
 
   const getStatusBadge = async (wager: MyWager) => {
     if (wager.status === "open") {
@@ -69,15 +67,23 @@ export const MyWagersTab = ({ userId, onBalanceUpdate }: MyWagersTabProps) => {
     }
     if (wager.status === "active") {
       // Check if user has already uploaded proof
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("wager_proofs")
         .select("status")
         .eq("wager_id", wager.id)
         .eq("user_id", userId)
-        .single();
+        .maybeSingle();
+
+      if (error) {
+        console.error("Error checking proof status:", error);
+      }
 
       if (data) {
-        return <Badge variant="outline">{data.status === "pending" ? "Proof submitted" : data.status}</Badge>;
+        const statusText = data.status === "pending" ? "Proof submitted" : 
+                          data.status === "ai_verified" ? "AI Verified" :
+                          data.status === "ai_failed" ? "Needs manual review" :
+                          data.status;
+        return <Badge variant="outline">{statusText}</Badge>;
       }
       return <Badge>Match in progress</Badge>;
     }
