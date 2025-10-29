@@ -117,10 +117,27 @@ export const MyWagersTab = ({ userId, onBalanceUpdate }: MyWagersTabProps) => {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl font-bold">My Wagers</h2>
+      <div className="flex flex-col gap-2 mb-4">
+        <h2 className="text-2xl font-bold">My Wagers</h2>
+        <div className="bg-muted/50 p-4 rounded-lg border border-border">
+          <h3 className="font-semibold text-sm mb-2">📸 How to Upload Results (AI Verified)</h3>
+          <ol className="text-sm text-muted-foreground space-y-1 list-decimal list-inside">
+            <li>Create a wager or join one using the code</li>
+            <li>Wait for both players to join (status: "Match in progress")</li>
+            <li>Play your match</li>
+            <li>Click "Upload Result" button that appears below</li>
+            <li>Enter the game name and upload your screenshot</li>
+            <li>AI will automatically verify and analyze your screenshot</li>
+            <li>Admin will review and declare the winner</li>
+          </ol>
+        </div>
+      </div>
       {myWagers.length === 0 ? (
         <Card className="p-8 text-center">
           <p className="text-muted-foreground">You haven't created or joined any wagers yet</p>
+          <p className="text-sm text-muted-foreground mt-2">
+            Go to "Open Wagers" tab to join or create your first wager
+          </p>
         </Card>
       ) : (
         <div className="grid gap-4">
@@ -156,13 +173,24 @@ export const MyWagersTab = ({ userId, onBalanceUpdate }: MyWagersTabProps) => {
 
                 <div className="flex items-center gap-3">
                   {wager.status === "active" && (
-                    <Button
-                      variant="bet"
-                      onClick={() => setUploadWagerId(wager.id)}
-                    >
-                      <Upload className="w-4 h-4 mr-2" />
-                      Upload Result
-                    </Button>
+                    <div className="flex flex-col gap-2">
+                      <Button
+                        variant="bet"
+                        onClick={() => setUploadWagerId(wager.id)}
+                        className="animate-pulse"
+                      >
+                        <Upload className="w-4 h-4 mr-2" />
+                        Upload Result (AI Verify)
+                      </Button>
+                      <p className="text-xs text-muted-foreground text-center">
+                        Screenshot will be AI verified
+                      </p>
+                    </div>
+                  )}
+                  {wager.status === "open" && (
+                    <Badge variant="secondary">
+                      Waiting for opponent to join
+                    </Badge>
                   )}
                 </div>
               </div>

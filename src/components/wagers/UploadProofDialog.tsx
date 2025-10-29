@@ -142,7 +142,7 @@ export const UploadProofDialog = ({ wagerId, onClose }: UploadProofDialogProps) 
         <DialogHeader>
           <DialogTitle>Upload Match Result</DialogTitle>
           <DialogDescription>
-            Upload a screenshot of the match result screen
+            Upload a clear screenshot showing the final score. Our AI will automatically analyze and verify your result.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
