@@ -87,8 +87,7 @@ export const AdminVerificationPanel = () => {
       .from("wager_proofs")
       .select(`
         *,
-        wager:mobile_wagers(*),
-        profiles(email)
+        mobile_wagers!wager_id(*)
       `)
       .in("status", ["pending", "ai_verified", "ai_failed"])
       .order("submitted_at", { ascending: true });
@@ -97,14 +96,28 @@ export const AdminVerificationPanel = () => {
       console.error("Error fetching pending proofs:", error);
       toast({
         title: "Error loading proofs",
-        description: "Please refresh the page",
+        description: error.message || "Please refresh the page",
         variant: "destructive",
       });
       return;
     }
 
     if (data) {
-      setPendingProofs(data as any);
+      // Fetch user emails separately
+      const userIds = data.map(p => p.user_id);
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("id, email")
+        .in("id", userIds);
+
+      // Combine the data
+      const proofsWithDetails = data.map(proof => ({
+        ...proof,
+        wager: proof.mobile_wagers,
+        profiles: profiles?.find(p => p.id === proof.user_id) || { email: 'Unknown' }
+      }));
+
+      setPendingProofs(proofsWithDetails as any);
     }
   };
 
