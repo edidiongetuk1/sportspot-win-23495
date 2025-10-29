@@ -223,6 +223,9 @@ export const AdminVerificationPanel = () => {
       // Calculate winnings (stake * 2)
       const winnings = Number(wager.stake_amount) * 2;
 
+      // Determine loser ID
+      const loserId = winnerId === wager.player_a_id ? wager.player_b_id : wager.player_a_id;
+
       // Get winner's current balance
       const { data: profile, error: profileError } = await supabase
         .from("profiles")
@@ -240,12 +243,20 @@ export const AdminVerificationPanel = () => {
 
       if (balanceError) throw balanceError;
 
-      // Record transaction
+      // Record win transaction
       await supabase.from("wager_transactions").insert({
         wager_id: wagerId,
         user_id: winnerId,
         type: "win",
         amount: winnings,
+      });
+
+      // Record loss transaction
+      await supabase.from("wager_transactions").insert({
+        wager_id: wagerId,
+        user_id: loserId,
+        type: "loss",
+        amount: -Number(wager.stake_amount),
       });
 
       toast({
@@ -259,6 +270,75 @@ export const AdminVerificationPanel = () => {
       toast({
         title: "Error",
         description: "Failed to declare winner",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeclareDraw = async (wagerId: string) => {
+    try {
+      // Get wager details
+      const { data: wager, error: wagerError } = await supabase
+        .from("mobile_wagers")
+        .select("*")
+        .eq("id", wagerId)
+        .single();
+
+      if (wagerError) throw wagerError;
+
+      // Update wager status to draw (no winner)
+      const { error: updateError } = await supabase
+        .from("mobile_wagers")
+        .update({
+          winner_id: null,
+          status: "draw",
+        })
+        .eq("id", wagerId);
+
+      if (updateError) throw updateError;
+
+      // Calculate 50% refund
+      const refundAmount = Number(wager.stake_amount) * 0.5;
+
+      // Get both players' balances
+      const { data: profiles, error: profilesError } = await supabase
+        .from("profiles")
+        .select("id, balance")
+        .in("id", [wager.player_a_id, wager.player_b_id]);
+
+      if (profilesError) throw profilesError;
+
+      // Update both players' balances
+      for (const profile of profiles) {
+        const newBalance = Number(profile.balance) + refundAmount;
+        
+        const { error: balanceError } = await supabase
+          .from("profiles")
+          .update({ balance: newBalance })
+          .eq("id", profile.id);
+
+        if (balanceError) throw balanceError;
+
+        // Record refund transaction
+        await supabase.from("wager_transactions").insert({
+          wager_id: wagerId,
+          user_id: profile.id,
+          type: "refund",
+          amount: refundAmount,
+        });
+      }
+
+      toast({
+        title: "Draw declared!",
+        description: `₦${refundAmount.toFixed(2)} refunded to each player (50%)`,
+      });
+
+      fetchPendingProofs();
+    } catch (error) {
+      console.error("Error declaring draw:", error);
+      toast({
+        title: "Error",
+        description: "Failed to declare draw",
         variant: "destructive",
       });
     }
@@ -390,8 +470,8 @@ export const AdminVerificationPanel = () => {
                     </div>
 
                     <div className="space-y-2 border-t pt-3">
-                      <p className="font-semibold">Declare Winner:</p>
-                      <div className="flex gap-2">
+                      <p className="font-semibold">Declare Result:</p>
+                      <div className="flex gap-2 flex-wrap">
                         <Button
                           size="sm"
                           onClick={() => handleDeclareWinner(proof.wager_id, proof.wager.player_a_id)}
@@ -403,6 +483,13 @@ export const AdminVerificationPanel = () => {
                           onClick={() => handleDeclareWinner(proof.wager_id, proof.wager.player_b_id)}
                         >
                           Player B Wins
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleDeclareDraw(proof.wager_id)}
+                        >
+                          Declare Draw (50% Refund)
                         </Button>
                       </div>
                     </div>
