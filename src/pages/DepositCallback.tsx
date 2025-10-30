@@ -38,43 +38,73 @@ const DepositCallback = () => {
       return;
     }
 
-    if (!user) return;
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "Please log in to deposit funds",
+        variant: "destructive",
+      });
+      navigate("/auth");
+      return;
+    }
 
     setIsProcessing(true);
 
     try {
+      console.log("Starting deposit for user:", user.id, "Amount:", amount);
+
       // Get current balance
-      const { data: profile } = await supabase
+      const { data: profile, error: fetchError } = await supabase
         .from("profiles")
         .select("balance")
         .eq("id", user.id)
         .single();
 
+      if (fetchError) {
+        console.error("Error fetching profile:", fetchError);
+        throw new Error(`Failed to fetch profile: ${fetchError.message}`);
+      }
+
       if (!profile) {
+        console.error("Profile not found for user:", user.id);
         throw new Error("Profile not found");
       }
 
-      const newBalance = Number(profile.balance) + Number(amount);
+      console.log("Current balance:", profile.balance);
+
+      const depositAmount = parseFloat(amount);
+      const newBalance = Number(profile.balance) + depositAmount;
+
+      console.log("New balance will be:", newBalance);
 
       // Update balance
-      const { error } = await supabase
+      const { data: updateData, error: updateError } = await supabase
         .from("profiles")
         .update({ balance: newBalance })
-        .eq("id", user.id);
+        .eq("id", user.id)
+        .select();
 
-      if (error) throw error;
+      if (updateError) {
+        console.error("Error updating balance:", updateError);
+        throw new Error(`Failed to update balance: ${updateError.message}`);
+      }
+
+      console.log("Balance updated successfully:", updateData);
 
       toast({
         title: "Deposit successful!",
-        description: `₦${amount} has been added to your balance`,
+        description: `₦${depositAmount.toFixed(2)} has been added to your balance`,
       });
 
-      navigate("/dashboard");
-    } catch (error) {
+      // Wait a moment before navigating to ensure state updates
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 500);
+    } catch (error: any) {
       console.error("Deposit error:", error);
       toast({
         title: "Deposit failed",
-        description: "Failed to process your deposit. Please contact support.",
+        description: error.message || "Failed to process your deposit. Please contact support.",
         variant: "destructive",
       });
     } finally {
