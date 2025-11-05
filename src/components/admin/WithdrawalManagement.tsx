@@ -46,7 +46,7 @@ export const WithdrawalManagement = () => {
         .from("withdrawals")
         .select(`
           *,
-          profiles!withdrawals_user_id_fkey(email, balance)
+          profiles!inner(email, balance)
         `)
         .order("created_at", { ascending: false });
 
