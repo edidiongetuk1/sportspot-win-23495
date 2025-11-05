@@ -4,9 +4,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/Navbar";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
 import { format } from "date-fns";
+import { WithdrawalDialog } from "@/components/WithdrawalDialog";
+import { AuditLogsList } from "@/components/AuditLogsList";
 
 interface Bet {
   id: string;
@@ -50,6 +53,7 @@ export default function Dashboard() {
   const [wagers, setWagers] = useState<Wager[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
+  const [withdrawalDialogOpen, setWithdrawalDialogOpen] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -182,6 +186,14 @@ export default function Dashboard() {
           <Card className="p-6">
             <p className="text-sm text-muted-foreground mb-2">Current Balance</p>
             <p className="text-3xl font-bold text-accent">₦{profile?.balance.toFixed(2)}</p>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setWithdrawalDialogOpen(true)}
+              className="w-full mt-4"
+            >
+              Withdraw Funds
+            </Button>
           </Card>
           <Card className="p-6">
             <p className="text-sm text-muted-foreground mb-2">Total Bets</p>
@@ -199,6 +211,10 @@ export default function Dashboard() {
               {bets.filter(bet => bet.status === 'pending').length}
             </p>
           </Card>
+        </div>
+
+        <div className="mb-8">
+          <AuditLogsList />
         </div>
 
         <div className="mb-8">
@@ -327,7 +343,7 @@ export default function Dashboard() {
                     <div>
                       <p className="text-sm text-muted-foreground">Potential Win</p>
                       <p className="font-bold text-accent">₦{bet.potential_win.toFixed(2)}</p>
-                    </div>
+                     </div>
                   </div>
                 </Card>
               ))}
@@ -335,6 +351,17 @@ export default function Dashboard() {
           )}
         </div>
       </main>
+
+      <WithdrawalDialog
+        open={withdrawalDialogOpen}
+        onOpenChange={setWithdrawalDialogOpen}
+        balance={profile?.balance || 0}
+        onSuccess={() => {
+          if (user) {
+            fetchProfile(user.id);
+          }
+        }}
+      />
     </div>
   );
 }

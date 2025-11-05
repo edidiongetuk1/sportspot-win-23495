@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      audit_logs: {
+        Row: {
+          action_type: string
+          amount: number
+          balance_after: number
+          balance_before: number
+          created_at: string
+          id: string
+          metadata: Json | null
+          reference_id: string | null
+          reference_type: string | null
+          user_id: string
+        }
+        Insert: {
+          action_type: string
+          amount: number
+          balance_after: number
+          balance_before: number
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          reference_id?: string | null
+          reference_type?: string | null
+          user_id: string
+        }
+        Update: {
+          action_type?: string
+          amount?: number
+          balance_after?: number
+          balance_before?: number
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          reference_id?: string | null
+          reference_type?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       bets: {
         Row: {
           created_at: string
@@ -352,6 +391,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      withdrawals: {
+        Row: {
+          account_number: string
+          admin_notes: string | null
+          amount: number
+          approved_at: string | null
+          approved_by: string | null
+          bank_name: string
+          created_at: string
+          id: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          account_number: string
+          admin_notes?: string | null
+          amount: number
+          approved_at?: string | null
+          approved_by?: string | null
+          bank_name: string
+          created_at?: string
+          id?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          account_number?: string
+          admin_notes?: string | null
+          amount?: number
+          approved_at?: string | null
+          approved_by?: string | null
+          bank_name?: string
+          created_at?: string
+          id?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
     }
     Views: {

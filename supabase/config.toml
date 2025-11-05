@@ -6,5 +6,8 @@ verify_jwt = true
 [functions.verify-wager-screenshot]
 verify_jwt = true
 
+[functions.process-withdrawal]
+verify_jwt = true
+
 [functions.paystack-webhook]
 verify_jwt = false

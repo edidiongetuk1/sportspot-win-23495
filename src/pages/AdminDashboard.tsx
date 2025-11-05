@@ -6,9 +6,11 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
 import { format } from "date-fns";
+import { WithdrawalManagement } from "@/components/admin/WithdrawalManagement";
 
 interface Match {
   id: string;
@@ -217,8 +219,16 @@ export default function AdminDashboard() {
       <main className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">Admin Dashboard</h1>
-          <p className="text-muted-foreground">Manage matches and results</p>
+          <p className="text-muted-foreground">Manage matches, withdrawals, and results</p>
         </div>
+
+        <Tabs defaultValue="matches" className="w-full">
+          <TabsList className="mb-6">
+            <TabsTrigger value="matches">Matches</TabsTrigger>
+            <TabsTrigger value="withdrawals">Withdrawals</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="matches" className="space-y-8">
 
         {/* Add Match Form */}
         <Card className="p-6 mb-8">
@@ -386,6 +396,12 @@ export default function AdminDashboard() {
             </div>
           )}
         </div>
+          </TabsContent>
+
+          <TabsContent value="withdrawals">
+            <WithdrawalManagement />
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );
