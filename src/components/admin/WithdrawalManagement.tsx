@@ -42,6 +42,7 @@ export const WithdrawalManagement = () => {
 
   const fetchWithdrawals = async () => {
     try {
+      console.log("Fetching withdrawals...");
       const { data, error } = await supabase
         .from("withdrawals")
         .select(`
@@ -50,13 +51,18 @@ export const WithdrawalManagement = () => {
         `)
         .order("created_at", { ascending: false });
 
-      if (error) throw error;
+      console.log("Withdrawal fetch result:", { data, error });
+      if (error) {
+        console.error("Withdrawal fetch error:", error);
+        throw error;
+      }
+      console.log("Setting withdrawals:", data);
       setWithdrawals(data as any || []);
     } catch (error) {
       console.error("Error fetching withdrawals:", error);
       toast({
         title: "Error",
-        description: "Failed to load withdrawals",
+        description: error instanceof Error ? error.message : "Failed to load withdrawals",
         variant: "destructive",
       });
     } finally {
