@@ -43,21 +43,42 @@ export const WithdrawalManagement = () => {
   const fetchWithdrawals = async () => {
     try {
       console.log("Fetching withdrawals...");
-      const { data, error } = await supabase
+      
+      // Fetch withdrawals
+      const { data: withdrawalsData, error: withdrawalsError } = await supabase
         .from("withdrawals")
-        .select(`
-          *,
-          profiles!inner(email, balance)
-        `)
+        .select("*")
         .order("created_at", { ascending: false });
 
-      console.log("Withdrawal fetch result:", { data, error });
-      if (error) {
-        console.error("Withdrawal fetch error:", error);
-        throw error;
+      if (withdrawalsError) {
+        console.error("Withdrawal fetch error:", withdrawalsError);
+        throw withdrawalsError;
       }
-      console.log("Setting withdrawals:", data);
-      setWithdrawals(data as any || []);
+
+      console.log("Withdrawals fetched:", withdrawalsData);
+
+      // Fetch all user profiles
+      const userIds = withdrawalsData?.map(w => w.user_id) || [];
+      const { data: profilesData, error: profilesError } = await supabase
+        .from("profiles")
+        .select("id, email, balance")
+        .in("id", userIds);
+
+      if (profilesError) {
+        console.error("Profiles fetch error:", profilesError);
+        throw profilesError;
+      }
+
+      console.log("Profiles fetched:", profilesData);
+
+      // Combine the data
+      const combined = withdrawalsData?.map(withdrawal => ({
+        ...withdrawal,
+        profiles: profilesData?.find(p => p.id === withdrawal.user_id) || { email: "Unknown", balance: 0 }
+      })) || [];
+
+      console.log("Combined data:", combined);
+      setWithdrawals(combined as any);
     } catch (error) {
       console.error("Error fetching withdrawals:", error);
       toast({
