@@ -53,19 +53,43 @@ Deno.serve(async (req): Promise<Response> => {
     }
 
     // Fetch withdrawal details
+    console.log('Fetching withdrawal:', withdrawalId);
     const { data: withdrawal, error: withdrawalError } = await supabase
       .from('withdrawals')
-      .select('*, profiles!inner(balance, email)')
+      .select('*')
       .eq('id', withdrawalId)
       .eq('status', 'pending')
       .single();
 
+    console.log('Withdrawal fetch result:', { withdrawal, withdrawalError });
+
     if (withdrawalError || !withdrawal) {
+      console.error('Withdrawal not found:', { withdrawalId, withdrawalError });
       return new Response(
         JSON.stringify({ error: 'Withdrawal not found or already processed' }),
         { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
+
+    // Fetch user profile separately
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('balance, email')
+      .eq('id', withdrawal.user_id)
+      .single();
+
+    console.log('Profile fetch result:', { profile, profileError });
+
+    if (profileError || !profile) {
+      console.error('Profile not found:', { userId: withdrawal.user_id, profileError });
+      return new Response(
+        JSON.stringify({ error: 'User profile not found' }),
+        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Attach profile to withdrawal for backward compatibility
+    withdrawal.profiles = profile;
 
     if (action === 'approve') {
       const currentBalance = Number(withdrawal.profiles.balance);
