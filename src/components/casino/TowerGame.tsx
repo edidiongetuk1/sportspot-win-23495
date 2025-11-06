@@ -139,7 +139,7 @@ const TowerGame = ({ user, balance, onBalanceUpdate }: TowerGameProps) => {
 
     toast({
       title: "Cashed Out!",
-      description: `Won $${payout.toFixed(2)} at ${useMultiplier.toFixed(2)}x`,
+      description: `Won ₦${payout.toFixed(2)} at ${useMultiplier.toFixed(2)}x`,
     });
   };
 
@@ -216,7 +216,7 @@ const TowerGame = ({ user, balance, onBalanceUpdate }: TowerGameProps) => {
                 <p className="text-sm text-muted-foreground">Level {currentLevel + 1} / {levels}</p>
               </div>
               <Button onClick={() => cashOut()} className="w-full" variant="default">
-                Cash Out ${(parseFloat(betAmount) * multiplier).toFixed(2)}
+                Cash Out ₦{(parseFloat(betAmount) * multiplier).toFixed(2)}
               </Button>
             </>
           )}
@@ -224,13 +224,13 @@ const TowerGame = ({ user, balance, onBalanceUpdate }: TowerGameProps) => {
           <div className="pt-4 border-t border-border space-y-2">
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Balance:</span>
-              <span className="font-semibold">${balance.toFixed(2)}</span>
+              <span className="font-semibold">₦{balance.toFixed(2)}</span>
             </div>
             {gameActive && (
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Potential Win:</span>
                 <span className="font-semibold text-primary">
-                  ${(parseFloat(betAmount) * multiplier).toFixed(2)}
+                  ₦{(parseFloat(betAmount) * multiplier).toFixed(2)}
                 </span>
               </div>
             )}

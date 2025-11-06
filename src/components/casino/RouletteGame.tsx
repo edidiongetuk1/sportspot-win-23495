@@ -113,7 +113,7 @@ const RouletteGame = ({ user, balance, onBalanceUpdate }: RouletteGameProps) => 
       if (totalWin > 0) {
         toast({
           title: "Winner!",
-          description: `Won $${totalWin.toFixed(2)}!`,
+          description: `Won ₦${totalWin.toFixed(2)}!`,
         });
       } else {
         toast({
@@ -222,12 +222,12 @@ const RouletteGame = ({ user, balance, onBalanceUpdate }: RouletteGameProps) => 
           <div className="pt-4 border-t border-border space-y-2">
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Balance:</span>
-              <span className="font-semibold">${balance.toFixed(2)}</span>
+              <span className="font-semibold">₦{balance.toFixed(2)}</span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Total Bet:</span>
               <span className="font-semibold">
-                ${(parseFloat(betAmount || "0") * selectedBets.length).toFixed(2)}
+                ₦{(parseFloat(betAmount || "0") * selectedBets.length).toFixed(2)}
               </span>
             </div>
           </div>

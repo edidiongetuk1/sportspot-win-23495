@@ -21,12 +21,25 @@ const InstantVirtualsGame = ({ user, balance, onBalanceUpdate }: InstantVirtuals
   const { toast } = useToast();
 
   const matches = [
-    { id: 1, home: "Thunder FC", away: "Lightning United", odds: [2.1, 3.2, 2.8] },
-    { id: 2, home: "Storm City", away: "Blaze Athletic", odds: [1.8, 3.5, 3.1] },
-    { id: 3, home: "Phoenix Riders", away: "Dragon Warriors", odds: [2.5, 3.0, 2.3] },
+    // Premier League
+    { id: 1, home: "Man City", away: "Liverpool", league: "Premier League", odds: [2.1, 3.2, 2.8] },
+    { id: 2, home: "Arsenal", away: "Chelsea", league: "Premier League", odds: [1.9, 3.4, 3.0] },
+    { id: 3, home: "Man United", away: "Tottenham", league: "Premier League", odds: [2.3, 3.1, 2.6] },
+    // La Liga
+    { id: 4, home: "Real Madrid", away: "Barcelona", league: "La Liga", odds: [2.0, 3.3, 2.9] },
+    { id: 5, home: "Atletico", away: "Sevilla", league: "La Liga", odds: [1.8, 3.5, 3.1] },
+    { id: 6, home: "Valencia", away: "Villarreal", league: "La Liga", odds: [2.2, 3.0, 2.7] },
+    // Serie A
+    { id: 7, home: "Inter Milan", away: "AC Milan", league: "Serie A", odds: [2.1, 3.2, 2.8] },
+    { id: 8, home: "Juventus", away: "Napoli", league: "Serie A", odds: [1.9, 3.4, 2.9] },
+    { id: 9, home: "Roma", away: "Lazio", league: "Serie A", odds: [2.0, 3.1, 2.8] },
+    // Bundesliga
+    { id: 10, home: "Bayern Munich", away: "Dortmund", league: "Bundesliga", odds: [1.7, 3.6, 3.2] },
+    { id: 11, home: "RB Leipzig", away: "Leverkusen", league: "Bundesliga", odds: [2.2, 3.0, 2.7] },
+    { id: 12, home: "Frankfurt", away: "Wolfsburg", league: "Bundesliga", odds: [2.1, 3.2, 2.8] },
   ];
 
-  const [currentMatch] = useState(matches[Math.floor(Math.random() * matches.length)]);
+  const [currentMatch, setCurrentMatch] = useState(matches[0]);
 
   const simulateMatch = async (teamChoice: "home" | "away" | "draw") => {
     if (!user) {
@@ -104,7 +117,7 @@ const InstantVirtualsGame = ({ user, balance, onBalanceUpdate }: InstantVirtuals
       if (won) {
         toast({
           title: "Winner!",
-          description: `${winner} won ${score}! Won $${payout.toFixed(2)}`,
+          description: `${winner} won ${score}! Won ₦${payout.toFixed(2)}`,
         });
       } else {
         toast({
@@ -123,19 +136,38 @@ const InstantVirtualsGame = ({ user, balance, onBalanceUpdate }: InstantVirtuals
   };
 
   return (
-    <div className="grid gap-6 lg:grid-cols-3">
-      <Card className="lg:col-span-2 p-6 bg-gradient-to-br from-card to-card/50 border-border">
-        <div className="flex items-center gap-2 mb-6">
-          <Zap className="w-6 h-6 text-accent" />
-          <h3 className="text-2xl font-bold">Virtual Match - Instant Result</h3>
-        </div>
+    <div className="space-y-6">
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Card className="p-6 bg-card border-border">
+          <h3 className="text-xl font-bold mb-4">Place Bet</h3>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm text-muted-foreground mb-2 block">Bet Amount</label>
+              <Input
+                type="number"
+                placeholder="0.00"
+                value={betAmount}
+                onChange={(e) => setBetAmount(e.target.value)}
+                disabled={simulating}
+              />
+            </div>
+            <div className="pt-4 border-t border-border space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Balance:</span>
+                <span className="font-semibold">₦{balance.toFixed(2)}</span>
+              </div>
+            </div>
+          </div>
+        </Card>
 
-        <div className="bg-gradient-to-br from-primary/5 to-accent/5 rounded-lg p-6 mb-6">
-          {simulating ? (
+        {simulating && (
+          <Card className="p-6 bg-gradient-to-br from-card to-card/50 border-border">
             <div className="text-center py-12 space-y-4">
               <div className="animate-pulse">
                 <Trophy className="w-16 h-16 mx-auto text-primary mb-4" />
                 <p className="text-xl font-semibold">Match in progress...</p>
+                <p className="text-sm text-muted-foreground mt-2">{currentMatch.league}</p>
+                <p className="text-lg font-semibold mt-2">{currentMatch.home} vs {currentMatch.away}</p>
               </div>
               <div className="flex justify-center gap-2">
                 {[...Array(3)].map((_, i) => (
@@ -144,110 +176,93 @@ const InstantVirtualsGame = ({ user, balance, onBalanceUpdate }: InstantVirtuals
                 ))}
               </div>
             </div>
-          ) : matchResult ? (
+          </Card>
+        )}
+
+        {matchResult && (
+          <Card className="p-6 bg-gradient-to-br from-card to-card/50 border-border">
             <div className="text-center py-12 space-y-4">
               <Trophy className="w-16 h-16 mx-auto text-accent mb-4" />
               <div>
                 <p className="text-sm text-muted-foreground mb-2">Final Result</p>
-                <p className="text-3xl font-bold text-primary">{matchResult.winner}</p>
+                <p className="text-sm text-muted-foreground">{currentMatch.league}</p>
+                <p className="text-2xl font-bold text-primary mt-2">{matchResult.winner}</p>
                 <p className="text-xl text-muted-foreground mt-2">{matchResult.score}</p>
               </div>
             </div>
-          ) : (
-            <div className="space-y-6">
+          </Card>
+        )}
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {matches.map((match) => (
+          <Card 
+            key={match.id} 
+            className={`p-4 bg-gradient-to-br from-card to-card/50 border-border transition-all ${
+              currentMatch.id === match.id && simulating ? 'ring-2 ring-primary' : ''
+            }`}
+          >
+            <div className="space-y-3">
               <div className="text-center">
-                <p className="text-sm text-muted-foreground mb-4">Quick Match</p>
-                <div className="flex items-center justify-center gap-4">
-                  <div className="text-center">
-                    <div className="w-16 h-16 mx-auto mb-2 rounded-full bg-primary/20 flex items-center justify-center">
-                      <Trophy className="w-8 h-8 text-primary" />
-                    </div>
-                    <p className="font-semibold">{currentMatch.home}</p>
-                    <p className="text-xs text-muted-foreground">Odds: {currentMatch.odds[0]}</p>
-                  </div>
-                  
-                  <div className="text-2xl font-bold text-muted-foreground">VS</div>
-                  
-                  <div className="text-center">
-                    <div className="w-16 h-16 mx-auto mb-2 rounded-full bg-accent/20 flex items-center justify-center">
-                      <Trophy className="w-8 h-8 text-accent" />
-                    </div>
-                    <p className="font-semibold">{currentMatch.away}</p>
-                    <p className="text-xs text-muted-foreground">Odds: {currentMatch.odds[2]}</p>
-                  </div>
+                <p className="text-xs text-muted-foreground mb-2">{match.league}</p>
+                <div className="flex items-center justify-center gap-2 mb-3">
+                  <p className="text-sm font-semibold">{match.home}</p>
+                  <span className="text-xs text-muted-foreground">vs</span>
+                  <p className="text-sm font-semibold">{match.away}</p>
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-3 gap-2">
                 <Button
-                  onClick={() => simulateMatch("home")}
-                  className="flex flex-col py-6 h-auto"
+                  onClick={() => {
+                    setCurrentMatch(match);
+                    simulateMatch("home");
+                  }}
+                  className="flex flex-col py-4 h-auto text-xs"
                   variant="outline"
+                  disabled={simulating}
+                  size="sm"
                 >
-                  <span className="font-semibold mb-1">{currentMatch.home}</span>
-                  <span className="text-primary text-lg">{currentMatch.odds[0]}x</span>
+                  <span className="font-semibold mb-1">Home</span>
+                  <span className="text-primary">{match.odds[0]}x</span>
                 </Button>
                 
                 <Button
-                  onClick={() => simulateMatch("draw")}
-                  className="flex flex-col py-6 h-auto"
+                  onClick={() => {
+                    setCurrentMatch(match);
+                    simulateMatch("draw");
+                  }}
+                  className="flex flex-col py-4 h-auto text-xs"
                   variant="outline"
+                  disabled={simulating}
+                  size="sm"
                 >
                   <span className="font-semibold mb-1">Draw</span>
-                  <span className="text-primary text-lg">{currentMatch.odds[1]}x</span>
+                  <span className="text-primary">{match.odds[1]}x</span>
                 </Button>
                 
                 <Button
-                  onClick={() => simulateMatch("away")}
-                  className="flex flex-col py-6 h-auto"
+                  onClick={() => {
+                    setCurrentMatch(match);
+                    simulateMatch("away");
+                  }}
+                  className="flex flex-col py-4 h-auto text-xs"
                   variant="outline"
+                  disabled={simulating}
+                  size="sm"
                 >
-                  <span className="font-semibold mb-1">{currentMatch.away}</span>
-                  <span className="text-primary text-lg">{currentMatch.odds[2]}x</span>
+                  <span className="font-semibold mb-1">Away</span>
+                  <span className="text-primary">{match.odds[2]}x</span>
                 </Button>
               </div>
             </div>
-          )}
-        </div>
+          </Card>
+        ))}
+      </div>
 
-        <div className="text-center text-sm text-muted-foreground">
-          <p>⚡ Instant result in 3 seconds • Real-time simulation • Fair odds</p>
-        </div>
-      </Card>
-
-      <Card className="p-6 bg-card border-border">
-        <h3 className="text-xl font-bold mb-4">Place Bet</h3>
-
-        <div className="space-y-4">
-          <div>
-            <label className="text-sm text-muted-foreground mb-2 block">Bet Amount</label>
-            <Input
-              type="number"
-              placeholder="0.00"
-              value={betAmount}
-              onChange={(e) => setBetAmount(e.target.value)}
-              disabled={simulating}
-            />
-          </div>
-
-          <div className="pt-4 border-t border-border space-y-2">
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Balance:</span>
-              <span className="font-semibold">${balance.toFixed(2)}</span>
-            </div>
-          </div>
-
-          <div className="space-y-2 pt-4">
-            <p className="text-sm font-semibold">How it works:</p>
-            <ul className="text-xs text-muted-foreground space-y-1">
-              <li>• Pick home win, draw, or away win</li>
-              <li>• Match simulates instantly</li>
-              <li>• Results based on realistic odds</li>
-              <li>• New match every round</li>
-            </ul>
-          </div>
-        </div>
-      </Card>
+      <div className="text-center text-sm text-muted-foreground">
+        <p>⚡ Instant result in 3 seconds • {matches.length} matches available • Fair odds from top 4 leagues</p>
+      </div>
     </div>
   );
 };

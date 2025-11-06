@@ -93,7 +93,7 @@ const AppleFortuneGame = ({ user, balance, onBalanceUpdate }: AppleFortuneGamePr
       if (prize.multiplier > 0) {
         toast({
           title: prize.label,
-          description: `Won $${payout.toFixed(2)}!`,
+          description: `Won ₦${payout.toFixed(2)}!`,
         });
       } else {
         toast({
@@ -183,7 +183,7 @@ const AppleFortuneGame = ({ user, balance, onBalanceUpdate }: AppleFortuneGamePr
           <div className="pt-4 border-t border-border space-y-2">
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Balance:</span>
-              <span className="font-semibold">${balance.toFixed(2)}</span>
+              <span className="font-semibold">₦{balance.toFixed(2)}</span>
             </div>
           </div>
 

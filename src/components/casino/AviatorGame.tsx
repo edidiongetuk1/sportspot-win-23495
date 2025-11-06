@@ -164,7 +164,7 @@ const AviatorGame = ({ user, balance, onBalanceUpdate }: AviatorGameProps) => {
 
     toast({
       title: "Bet Placed!",
-      description: `$${amount} bet placed`,
+      description: `₦${amount} bet placed`,
     });
   };
 
@@ -195,7 +195,7 @@ const AviatorGame = ({ user, balance, onBalanceUpdate }: AviatorGameProps) => {
 
     toast({
       title: "Cashed Out!",
-      description: `Won $${payout.toFixed(2)} at ${multiplier.toFixed(2)}x`,
+      description: `Won ₦${payout.toFixed(2)} at ${multiplier.toFixed(2)}x`,
     });
   };
 
@@ -280,13 +280,13 @@ const AviatorGame = ({ user, balance, onBalanceUpdate }: AviatorGameProps) => {
           <div className="pt-4 border-t border-border space-y-2">
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Balance:</span>
-              <span className="font-semibold">${balance.toFixed(2)}</span>
+              <span className="font-semibold">₦{balance.toFixed(2)}</span>
             </div>
             {isBetPlaced && (
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Potential Win:</span>
                 <span className="font-semibold text-primary">
-                  ${(parseFloat(betAmount) * multiplier).toFixed(2)}
+                  ₦{(parseFloat(betAmount) * multiplier).toFixed(2)}
                 </span>
               </div>
             )}
