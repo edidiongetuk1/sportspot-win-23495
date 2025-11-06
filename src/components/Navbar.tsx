@@ -67,7 +67,7 @@ export const Navbar = ({
                 </Button>
               </> : <>
                 <Link to="/auth">
-                  <Button variant="outline" size="sm">Login</Button>
+                  <Button variant="outline" size="sm" className="text-base">Login</Button>
                 </Link>
                 <Link to="/auth">
                   <Button variant="default" size="sm">Sign Up</Button>
