@@ -200,7 +200,7 @@ const Index = () => {
               <br />
               <span className="text-foreground">On Every Game</span>
             </h1>
-            <p className="text-[#18e77d] font-semibold text-xl">From the arena to the odds  GameX is where gamers win</p>
+            <p className="font-semibold text-sm text-slate-50">From the arena to the odds  GameX is where gamers win</p>
             <div className="flex gap-4">
               <Button variant="bet" size="lg">
                 Start Betting
