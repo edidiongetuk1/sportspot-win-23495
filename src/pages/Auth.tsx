@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,15 +9,23 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const authSchema = z.object({
   email: z.string().trim().email({ message: "Invalid email address" }),
   password: z.string().min(6, { message: "Password must be at least 6 characters" }),
 });
 
+const signupSchema = authSchema.extend({
+  acceptedTerms: z.boolean().refine((val) => val === true, {
+    message: "You must accept the terms and conditions",
+  }),
+});
+
 export default function Auth() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [loading, setLoading] = useState(false);
   const [resetMode, setResetMode] = useState(false);
   const [authError, setAuthError] = useState("");
@@ -38,7 +46,7 @@ export default function Auth() {
     setAuthError("");
     
     try {
-      const validated = authSchema.parse({ email, password });
+      const validated = signupSchema.parse({ email, password, acceptedTerms });
       setLoading(true);
       
       const { error } = await supabase.auth.signUp({
@@ -245,11 +253,32 @@ export default function Auth() {
                     required
                   />
                 </div>
-                <Button type="submit" className="w-full" disabled={loading}>
+                <div className="flex items-start space-x-2">
+                  <Checkbox
+                    id="terms"
+                    checked={acceptedTerms}
+                    onCheckedChange={(checked) => setAcceptedTerms(checked as boolean)}
+                    required
+                  />
+                  <label
+                    htmlFor="terms"
+                    className="text-sm text-muted-foreground leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    I agree to the{" "}
+                    <Link
+                      to="/terms"
+                      className="text-primary hover:underline"
+                      target="_blank"
+                    >
+                      Terms and Conditions
+                    </Link>
+                  </label>
+                </div>
+                <Button type="submit" className="w-full" disabled={loading || !acceptedTerms}>
                   {loading ? "Creating account..." : "Sign Up"}
                 </Button>
                 <p className="text-xs text-muted-foreground text-center">
-                  Get $1000 bonus on signup!
+                  Get ₦1000 bonus on signup!
                 </p>
               </form>
             </TabsContent>
