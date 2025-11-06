@@ -272,6 +272,14 @@ export default function Auth() {
                     >
                       Terms and Conditions
                     </Link>
+                    {" "}and{" "}
+                    <Link
+                      to="/privacy"
+                      className="text-primary hover:underline"
+                      target="_blank"
+                    >
+                      Privacy Policy
+                    </Link>
                   </label>
                 </div>
                 <Button type="submit" className="w-full" disabled={loading || !acceptedTerms}>

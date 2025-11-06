@@ -11,6 +11,7 @@ import Casino from "./pages/Casino";
 import MobileWagers from "./pages/MobileWagers";
 import DepositCallback from "./pages/DepositCallback";
 import Terms from "./pages/Terms";
+import Privacy from "./pages/Privacy";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,6 +31,7 @@ const App = () => (
           <Route path="/mobile-wagers" element={<MobileWagers />} />
           <Route path="/deposit-callback" element={<DepositCallback />} />
           <Route path="/terms" element={<Terms />} />
+          <Route path="/privacy" element={<Privacy />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
