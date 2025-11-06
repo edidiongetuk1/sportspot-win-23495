@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
 import { format } from "date-fns";
 import { WithdrawalDialog } from "@/components/WithdrawalDialog";
+import { DepositDialog } from "@/components/DepositDialog";
 import { AuditLogsList } from "@/components/AuditLogsList";
 
 interface Bet {
@@ -54,6 +55,7 @@ export default function Dashboard() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [withdrawalDialogOpen, setWithdrawalDialogOpen] = useState(false);
+  const [depositDialogOpen, setDepositDialogOpen] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -186,14 +188,24 @@ export default function Dashboard() {
           <Card className="p-6">
             <p className="text-sm text-muted-foreground mb-2">Current Balance</p>
             <p className="text-3xl font-bold text-accent">₦{profile?.balance.toFixed(2)}</p>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => setWithdrawalDialogOpen(true)}
-              className="w-full mt-4"
-            >
-              Withdraw Funds
-            </Button>
+            <div className="flex gap-2 mt-4">
+              <Button
+                size="sm"
+                variant="bet"
+                onClick={() => setDepositDialogOpen(true)}
+                className="flex-1"
+              >
+                Deposit
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setWithdrawalDialogOpen(true)}
+                className="flex-1"
+              >
+                Withdraw
+              </Button>
+            </div>
           </Card>
           <Card className="p-6">
             <p className="text-sm text-muted-foreground mb-2">Total Bets</p>
@@ -356,6 +368,16 @@ export default function Dashboard() {
         open={withdrawalDialogOpen}
         onOpenChange={setWithdrawalDialogOpen}
         balance={profile?.balance || 0}
+        onSuccess={() => {
+          if (user) {
+            fetchProfile(user.id);
+          }
+        }}
+      />
+
+      <DepositDialog
+        open={depositDialogOpen}
+        onOpenChange={setDepositDialogOpen}
         onSuccess={() => {
           if (user) {
             fetchProfile(user.id);
