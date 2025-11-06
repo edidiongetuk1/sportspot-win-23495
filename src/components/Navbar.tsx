@@ -21,7 +21,7 @@ export const Navbar = ({
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-primary rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-primary flex items-center justify-center rounded-md bg-[#2e6f88]">
               <span className="text-xl md:text-2xl font-bold text-primary-foreground">​𝑮
             </span>
             </div>
