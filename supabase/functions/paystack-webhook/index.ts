@@ -85,7 +85,8 @@ Deno.serve(async (req) => {
 
       // Update balance
       const depositAmount = amount / 100; // Convert from kobo to naira
-      const newBalance = Number(profile.balance) + depositAmount;
+      const oldBalance = Number(profile.balance);
+      const newBalance = oldBalance + depositAmount;
 
       const { error: updateError } = await supabase
         .from('profiles')
@@ -97,9 +98,29 @@ Deno.serve(async (req) => {
         throw updateError;
       }
 
+      // Create audit log for deposit
+      const { error: auditError } = await supabase
+        .from('audit_logs')
+        .insert({
+          user_id: profile.id,
+          action_type: 'deposit',
+          amount: depositAmount,
+          balance_before: oldBalance,
+          balance_after: newBalance,
+          reference_type: 'deposit',
+          metadata: {
+            payment_reference: event.data.reference,
+            customer_email: customer.email
+          }
+        });
+
+      if (auditError) {
+        console.error('Failed to create audit log:', auditError);
+      }
+
       console.log('Balance updated successfully:', {
         userId: profile.id,
-        oldBalance: profile.balance,
+        oldBalance,
         depositAmount,
         newBalance
       });
