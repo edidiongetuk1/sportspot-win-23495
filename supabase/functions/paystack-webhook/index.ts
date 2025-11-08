@@ -68,16 +68,34 @@ Deno.serve(async (req) => {
       const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
       const supabase = createClient(supabaseUrl, supabaseKey);
 
-      // Find user by email
+      // Find user by email from auth.users
+      const { data: { users }, error: userError } = await supabase.auth.admin.listUsers();
+      
+      if (userError) {
+        console.error('Error fetching users:', userError);
+        throw userError;
+      }
+
+      const user = users.find(u => u.email === customer.email);
+      
+      if (!user) {
+        console.error('User not found for email:', customer.email);
+        return new Response(JSON.stringify({ error: 'User not found' }), {
+          status: 404,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      // Get user's profile
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('id, balance')
-        .eq('email', customer.email)
+        .eq('id', user.id)
         .single();
 
       if (profileError || !profile) {
-        console.error('Profile not found for email:', customer.email);
-        return new Response(JSON.stringify({ error: 'User not found' }), {
+        console.error('Profile not found for user:', user.id);
+        return new Response(JSON.stringify({ error: 'Profile not found' }), {
           status: 404,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
