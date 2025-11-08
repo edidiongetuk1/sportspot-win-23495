@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
 import { format } from "date-fns";
 import { WithdrawalManagement } from "@/components/admin/WithdrawalManagement";
+import { TransactionsManagement } from "@/components/admin/TransactionsManagement";
 
 interface Match {
   id: string;
@@ -226,6 +227,7 @@ export default function AdminDashboard() {
           <TabsList className="mb-6">
             <TabsTrigger value="matches">Matches</TabsTrigger>
             <TabsTrigger value="withdrawals">Withdrawals</TabsTrigger>
+            <TabsTrigger value="transactions">Transactions</TabsTrigger>
           </TabsList>
 
           <TabsContent value="matches" className="space-y-8">
@@ -400,6 +402,10 @@ export default function AdminDashboard() {
 
           <TabsContent value="withdrawals">
             <WithdrawalManagement />
+          </TabsContent>
+
+          <TabsContent value="transactions">
+            <TransactionsManagement />
           </TabsContent>
         </Tabs>
       </main>
