@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DepositDialog } from "@/components/DepositDialog";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
 import { CreateWagerDialog } from "@/components/wagers/CreateWagerDialog";
@@ -34,6 +35,7 @@ const MobileWagers = () => {
   const [filteredWagers, setFilteredWagers] = useState<Wager[]>([]);
   const [searchCode, setSearchCode] = useState("");
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [depositDialogOpen, setDepositDialogOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -258,6 +260,7 @@ const MobileWagers = () => {
         isAuthenticated={!!user}
         onLogout={handleLogout}
         isAdmin={isAdmin}
+        onDepositClick={() => setDepositDialogOpen(true)}
       />
 
       {/* Hero Section */}
@@ -365,6 +368,16 @@ const MobileWagers = () => {
         onWagerCreated={() => {
           fetchOpenWagers();
           if (user) fetchProfile(user.id);
+        }}
+      />
+
+      <DepositDialog
+        open={depositDialogOpen}
+        onOpenChange={setDepositDialogOpen}
+        onSuccess={() => {
+          if (user) {
+            fetchProfile(user.id);
+          }
         }}
       />
     </div>

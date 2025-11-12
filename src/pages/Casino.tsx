@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/Navbar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
+import { DepositDialog } from "@/components/DepositDialog";
 import { useToast } from "@/hooks/use-toast";
 import { User, Session } from "@supabase/supabase-js";
 import { Plane, Dices, Castle, Apple, Zap } from "lucide-react";
@@ -18,6 +19,7 @@ const Casino = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [balance, setBalance] = useState(0);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [depositDialogOpen, setDepositDialogOpen] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -95,6 +97,7 @@ const Casino = () => {
         isAuthenticated={!!user}
         onLogout={handleLogout}
         isAdmin={isAdmin}
+        onDepositClick={() => setDepositDialogOpen(true)}
       />
 
       <div className="container mx-auto px-4 py-8">
@@ -164,6 +167,16 @@ const Casino = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      <DepositDialog
+        open={depositDialogOpen}
+        onOpenChange={setDepositDialogOpen}
+        onSuccess={() => {
+          if (user) {
+            fetchProfile(user.id);
+          }
+        }}
+      />
     </div>
   );
 };

@@ -176,6 +176,7 @@ export default function Dashboard() {
         balance={profile?.balance || 0} 
         isAuthenticated={true}
         onLogout={handleLogout}
+        onDepositClick={() => setDepositDialogOpen(true)}
       />
       
       <main className="container mx-auto px-4 py-8">

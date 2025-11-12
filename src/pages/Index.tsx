@@ -6,6 +6,7 @@ import { MatchCard } from "@/components/MatchCard";
 import { BetSlip } from "@/components/BetSlip";
 import { MyBetsTab } from "@/components/MyBetsTab";
 import { UploadBetSlipDialog } from "@/components/UploadBetSlipDialog";
+import { DepositDialog } from "@/components/DepositDialog";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
@@ -38,6 +39,7 @@ const Index = () => {
   const [matches, setMatches] = useState<Match[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
+  const [depositDialogOpen, setDepositDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("football");
   const navigate = useNavigate();
   const {
@@ -182,7 +184,7 @@ const Index = () => {
     setBets([]);
   };
   return <div className="min-h-screen bg-background">
-      <Navbar balance={balance} isAuthenticated={!!user} onLogout={handleLogout} isAdmin={isAdmin} />
+      <Navbar balance={balance} isAuthenticated={!!user} onLogout={handleLogout} isAdmin={isAdmin} onDepositClick={() => setDepositDialogOpen(true)} />
 
       {/* Hero Section */}
       <div className="relative h-[400px] overflow-hidden">
@@ -272,6 +274,16 @@ const Index = () => {
       <UploadBetSlipDialog isOpen={isUploadDialogOpen} onClose={() => setIsUploadDialogOpen(false)} onUploadComplete={() => {
       setActiveTab("my-bets");
     }} />
+
+      <DepositDialog
+        open={depositDialogOpen}
+        onOpenChange={setDepositDialogOpen}
+        onSuccess={() => {
+          if (user) {
+            fetchProfile(user.id);
+          }
+        }}
+      />
     </div>;
 };
 export default Index;

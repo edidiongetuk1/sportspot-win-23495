@@ -8,12 +8,14 @@ interface NavbarProps {
   isAuthenticated?: boolean;
   onLogout?: () => void;
   isAdmin?: boolean;
+  onDepositClick?: () => void;
 }
 export const Navbar = ({
   balance = 0,
   isAuthenticated = false,
   onLogout,
-  isAdmin = false
+  isAdmin = false,
+  onDepositClick
 }: NavbarProps) => {
   const [isOpen, setIsOpen] = useState(false);
   return <nav className="border-b border-border bg-card/50 backdrop-blur-lg sticky top-0 z-50 animate-fade-in-down">
@@ -52,7 +54,7 @@ export const Navbar = ({
                   <Wallet className="w-4 h-4 text-accent" />
                   <span className="font-bold text-accent text-sm">₦{balance.toFixed(2)}</span>
                 </div>
-                <Button variant="bet" size="sm" onClick={() => window.location.href = 'https://paystack.shop/pay/imx4s34hm4'} className="hover:scale-110 transition-transform duration-300">
+                <Button variant="bet" size="sm" onClick={onDepositClick} className="hover:scale-110 transition-transform duration-300">
                   <Plus className="w-4 h-4 mr-1" />
                   Deposit
                 </Button>
@@ -82,7 +84,7 @@ export const Navbar = ({
                   <Wallet className="w-3 h-3 text-accent" />
                   <span className="font-bold text-accent text-xs">₦{balance.toFixed(0)}</span>
                 </div>
-                <Button variant="bet" size="sm" onClick={() => window.location.href = 'https://paystack.shop/pay/imx4s34hm4'} className="h-8 px-2">
+                <Button variant="bet" size="sm" onClick={onDepositClick} className="h-8 px-2">
                   <Plus className="w-3 h-3" />
                 </Button>
               </>}
