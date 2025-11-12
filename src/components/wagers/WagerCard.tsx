@@ -54,20 +54,20 @@ export const WagerCard = ({ wager, currentUserId, onJoin }: WagerCardProps) => {
   };
 
   return (
-    <Card className="p-6 bg-gradient-card border-border hover:border-primary/50 transition-colors">
+    <Card className="p-6 bg-gradient-card border-border hover:border-primary/50 transition-all duration-300 hover:shadow-glow hover:scale-[1.02] animate-fade-in">
       <div className="flex flex-col gap-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex-1 space-y-2">
             <div className="flex items-center gap-2">
-              <Trophy className="w-5 h-5 text-primary" />
+              <Trophy className="w-5 h-5 text-primary animate-bounce-subtle" />
               <h3 className="font-bold text-lg">{wager.game_type}</h3>
             </div>
             
             <div className="flex flex-wrap gap-2 items-center">
-              <Badge variant="secondary">
+              <Badge variant="secondary" className="hover:scale-110 transition-transform duration-300">
                 Stake: ₦{Number(wager.stake_amount).toFixed(2)}
               </Badge>
-              <Badge variant="outline">
+              <Badge variant="outline" className="hover:scale-110 transition-transform duration-300">
                 Win: ₦{(Number(wager.stake_amount) * 2).toFixed(2)}
               </Badge>
             </div>
@@ -83,14 +83,15 @@ export const WagerCard = ({ wager, currentUserId, onJoin }: WagerCardProps) => {
             </div>
 
             {isCreator && (
-              <div className="flex items-center gap-2 mt-2">
-                <Badge variant="default" className="font-mono">
+              <div className="flex items-center gap-2 mt-2 animate-scale-in">
+                <Badge variant="default" className="font-mono animate-glow-pulse">
                   {wager.wager_code}
                 </Badge>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={handleCopyCode}
+                  className="hover:scale-110 transition-transform duration-300"
                 >
                   <Copy className="w-4 h-4" />
                 </Button>
@@ -103,6 +104,7 @@ export const WagerCard = ({ wager, currentUserId, onJoin }: WagerCardProps) => {
               <Button
                 variant="bet"
                 onClick={() => setShowCodeInput(true)}
+                className="hover:scale-110 transition-transform duration-300"
               >
                 Join with Code
               </Button>
@@ -116,7 +118,7 @@ export const WagerCard = ({ wager, currentUserId, onJoin }: WagerCardProps) => {
         </div>
 
         {canJoin && showCodeInput && (
-          <div className="flex gap-2">
+          <div className="flex gap-2 animate-fade-in-up">
             <Input
               placeholder="Enter wager code"
               value={enteredCode}
@@ -124,10 +126,10 @@ export const WagerCard = ({ wager, currentUserId, onJoin }: WagerCardProps) => {
               className="font-mono"
               maxLength={6}
             />
-            <Button variant="bet" onClick={handleJoinAttempt}>
+            <Button variant="bet" onClick={handleJoinAttempt} className="hover:scale-110 transition-transform duration-300">
               Join
             </Button>
-            <Button variant="outline" onClick={() => setShowCodeInput(false)}>
+            <Button variant="outline" onClick={() => setShowCodeInput(false)} className="hover:scale-110 transition-transform duration-300">
               Cancel
             </Button>
           </div>

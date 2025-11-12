@@ -33,7 +33,7 @@ export const BetSlip = ({ bets, onRemoveBet, onClearAll, onPlaceBet, userBalance
   };
 
   return (
-    <Card className="bg-gradient-card border-border sticky top-4">
+    <Card className="bg-gradient-card border-border sticky top-4 animate-scale-in">
       <div className="p-4 border-b border-border">
         <div className="flex items-center justify-between">
           <h3 className="font-bold text-lg">Bet Slip</h3>
@@ -42,7 +42,7 @@ export const BetSlip = ({ bets, onRemoveBet, onClearAll, onPlaceBet, userBalance
               variant="ghost"
               size="sm"
               onClick={onClearAll}
-              className="text-muted-foreground hover:text-destructive"
+              className="text-muted-foreground hover:text-destructive hover:scale-110 transition-all duration-300"
             >
               Clear All
             </Button>
@@ -52,7 +52,7 @@ export const BetSlip = ({ bets, onRemoveBet, onClearAll, onPlaceBet, userBalance
 
       <div className="p-4 space-y-4">
         {bets.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
+          <div className="text-center py-8 text-muted-foreground animate-fade-in">
             <p>No bets selected</p>
             <p className="text-sm mt-2">Click on odds to add to bet slip</p>
           </div>
@@ -60,10 +60,11 @@ export const BetSlip = ({ bets, onRemoveBet, onClearAll, onPlaceBet, userBalance
           <>
             {/* Bet Items */}
             <div className="space-y-2 max-h-[300px] overflow-y-auto">
-              {bets.map((bet) => (
+              {bets.map((bet, index) => (
                 <div
                   key={bet.id}
-                  className="flex items-center justify-between p-3 bg-secondary rounded-lg group"
+                  className="flex items-center justify-between p-3 bg-secondary rounded-lg group hover:bg-secondary/80 transition-all duration-300 animate-slide-in-left"
+                  style={{animationDelay: `${index * 0.1}s`}}
                 >
                   <div className="flex-1">
                     <p className="font-medium text-sm">{bet.selection}</p>
@@ -73,7 +74,7 @@ export const BetSlip = ({ bets, onRemoveBet, onClearAll, onPlaceBet, userBalance
                     variant="ghost"
                     size="sm"
                     onClick={() => onRemoveBet(bet.id)}
-                    className="opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110"
                   >
                     <X className="w-4 h-4" />
                   </Button>
@@ -117,7 +118,7 @@ export const BetSlip = ({ bets, onRemoveBet, onClearAll, onPlaceBet, userBalance
             {/* Place Bet Button */}
             <Button
               variant="bet"
-              className="w-full"
+              className="w-full hover:scale-105 transition-transform duration-300 animate-glow-pulse"
               disabled={!stake || stakeAmount <= 0 || stakeAmount > userBalance}
               onClick={handlePlaceBet}
             >
