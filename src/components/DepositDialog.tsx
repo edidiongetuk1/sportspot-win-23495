@@ -75,14 +75,38 @@ export function DepositDialog({ open, onOpenChange, onSuccess }: DepositDialogPr
         amount: Math.round(parseFloat(amount) * 100), // Convert to kobo
         currency: "NGN",
         ref: `DEP_${Date.now()}_${user.id.substring(0, 8)}`,
-        callback: function(response: any) {
-          toast({
-            title: "Payment successful!",
-            description: "Your deposit will be credited shortly.",
-          });
-          onSuccess();
-          onOpenChange(false);
-          setAmount("");
+        callback: async function(response: any) {
+          console.log('Paystack payment response:', response);
+          
+          try {
+            // Verify and process the payment
+            const { data, error } = await supabase.functions.invoke('verify-deposit', {
+              body: { reference: response.reference }
+            });
+
+            if (error) throw error;
+
+            if (data?.success) {
+              toast({
+                title: "Deposit successful!",
+                description: `₦${data.amount.toFixed(2)} has been added to your balance.`,
+              });
+              onSuccess();
+              onOpenChange(false);
+              setAmount("");
+            } else {
+              throw new Error(data?.error || 'Payment verification failed');
+            }
+          } catch (error) {
+            console.error('Verification error:', error);
+            toast({
+              title: "Verification failed",
+              description: error instanceof Error ? error.message : "Please contact support if amount was deducted",
+              variant: "destructive",
+            });
+          }
+          
+          setLoading(false);
         },
         onClose: function() {
           setLoading(false);
