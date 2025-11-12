@@ -116,15 +116,6 @@ export const AuditLogsList = () => {
                       ₦{log.balance_before.toLocaleString()} → ₦{log.balance_after.toLocaleString()}
                     </span>
                   </div>
-
-                  {log.metadata && Object.keys(log.metadata).length > 0 && (
-                    <details className="text-xs">
-                      <summary className="cursor-pointer text-muted-foreground">Details</summary>
-                      <pre className="mt-2 bg-muted p-2 rounded overflow-x-auto">
-                        {JSON.stringify(log.metadata, null, 2)}
-                      </pre>
-                    </details>
-                  )}
                 </div>
               ))
             )}
