@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { Copy, Upload, CheckCircle } from "lucide-react";
 
 interface DepositDialogProps {
   open: boolean;
@@ -12,36 +13,33 @@ interface DepositDialogProps {
   onSuccess: () => void;
 }
 
-declare global {
-  interface Window {
-    PaystackPop: any;
-  }
-}
-
-const PAYSTACK_PUBLIC_KEY = "pk_live_c8520149d55a475c1759fd5b09f6d42fd901af2a";
+const BANK_ACCOUNT = "9128477187";
+const BANK_NAME = "Opay Bank";
 
 export function DepositDialog({ open, onOpenChange, onSuccess }: DepositDialogProps) {
   const [amount, setAmount] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [receipt, setReceipt] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [copied, setCopied] = useState(false);
   const { toast } = useToast();
 
-  const loadPaystackScript = () => {
-    return new Promise((resolve, reject) => {
-      if (window.PaystackPop) {
-        resolve(window.PaystackPop);
-        return;
-      }
-
-      const script = document.createElement("script");
-      script.src = "https://js.paystack.co/v1/inline.js";
-      script.async = true;
-      script.onload = () => resolve(window.PaystackPop);
-      script.onerror = reject;
-      document.body.appendChild(script);
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    toast({
+      title: "Copied!",
+      description: "Account number copied to clipboard",
     });
+    setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleDeposit = async () => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setReceipt(e.target.files[0]);
+    }
+  };
+
+  const handleSubmit = async () => {
     if (!amount || parseFloat(amount) <= 0) {
       toast({
         title: "Invalid amount",
@@ -51,110 +49,171 @@ export function DepositDialog({ open, onOpenChange, onSuccess }: DepositDialogPr
       return;
     }
 
+    if (!receipt) {
+      toast({
+        title: "Receipt required",
+        description: "Please upload your payment receipt",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
-      setLoading(true);
+      setUploading(true);
 
       // Get user info
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("email")
-        .eq("id", user.id)
+      // Upload receipt to storage
+      const fileExt = receipt.name.split('.').pop();
+      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+      
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('deposit-receipts')
+        .upload(fileName, receipt);
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('deposit-receipts')
+        .getPublicUrl(fileName);
+
+      // Create deposit receipt record
+      const { data: receiptData, error: insertError } = await supabase
+        .from('deposit_receipts')
+        .insert({
+          user_id: user.id,
+          amount: parseFloat(amount),
+          receipt_url: publicUrl,
+          status: 'pending'
+        })
+        .select()
         .single();
 
-      if (!profile) throw new Error("Profile not found");
+      if (insertError) throw insertError;
 
-      // Load Paystack script
-      await loadPaystackScript();
-
-      const handler = window.PaystackPop.setup({
-        key: PAYSTACK_PUBLIC_KEY,
-        email: profile.email,
-        amount: Math.round(parseFloat(amount) * 100), // Convert to kobo
-        currency: "NGN",
-        ref: `DEP_${Date.now()}_${user.id.substring(0, 8)}`,
-        callback: async function(response: any) {
-          console.log('Paystack payment response:', response);
-          
-          try {
-            // Verify and process the payment
-            const { data, error } = await supabase.functions.invoke('verify-deposit', {
-              body: { reference: response.reference }
-            });
-
-            if (error) throw error;
-
-            if (data?.success) {
-              toast({
-                title: "Deposit successful!",
-                description: `₦${data.amount.toFixed(2)} has been added to your balance.`,
-              });
-              onSuccess();
-              onOpenChange(false);
-              setAmount("");
-            } else {
-              throw new Error(data?.error || 'Payment verification failed');
-            }
-          } catch (error) {
-            console.error('Verification error:', error);
-            toast({
-              title: "Verification failed",
-              description: error instanceof Error ? error.message : "Please contact support if amount was deducted",
-              variant: "destructive",
-            });
-          }
-          
-          setLoading(false);
-        },
-        onClose: function() {
-          setLoading(false);
-        },
+      // Trigger AI verification
+      const { error: verifyError } = await supabase.functions.invoke('verify-deposit-receipt', {
+        body: {
+          receipt_url: publicUrl,
+          amount: parseFloat(amount),
+          receipt_id: receiptData.id
+        }
       });
 
-      handler.openIframe();
-    } catch (error) {
-      console.error("Deposit error:", error);
+      if (verifyError) {
+        console.error('AI verification error:', verifyError);
+        // Don't throw - receipt is saved, admin can verify manually
+      }
+
       toast({
-        title: "Deposit failed",
-        description: error instanceof Error ? error.message : "Failed to initialize payment",
+        title: "Receipt submitted!",
+        description: "Your deposit receipt is being verified. You'll be notified once approved.",
+      });
+
+      onSuccess();
+      onOpenChange(false);
+      setAmount("");
+      setReceipt(null);
+    } catch (error) {
+      console.error("Upload error:", error);
+      toast({
+        title: "Upload failed",
+        description: error instanceof Error ? error.message : "Failed to upload receipt",
         variant: "destructive",
       });
-      setLoading(false);
+    } finally {
+      setUploading(false);
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>Deposit Funds</DialogTitle>
           <DialogDescription>
-            Enter the amount you want to deposit. Payment will be processed via Paystack.
+            Transfer money to our bank account and upload your receipt for verification.
           </DialogDescription>
         </DialogHeader>
+        
         <div className="space-y-4 py-4">
+          {/* Bank Details */}
+          <div className="rounded-lg border border-border bg-muted/50 p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Account Number</p>
+                <p className="text-lg font-bold">{BANK_ACCOUNT}</p>
+              </div>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => copyToClipboard(BANK_ACCOUNT)}
+              >
+                {copied ? <CheckCircle className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+              </Button>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Bank Name</p>
+              <p className="font-semibold">{BANK_NAME}</p>
+            </div>
+          </div>
+
+          {/* Amount Input */}
           <div className="space-y-2">
             <Label htmlFor="amount">Amount (₦)</Label>
             <Input
               id="amount"
               type="number"
-              placeholder="Enter amount"
+              placeholder="Enter amount to deposit"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               min="0"
               step="0.01"
             />
           </div>
+
+          {/* Receipt Upload */}
+          <div className="space-y-2">
+            <Label htmlFor="receipt">Upload Receipt</Label>
+            <div className="flex items-center gap-2">
+              <Input
+                id="receipt"
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="flex-1"
+              />
+              {receipt && <CheckCircle className="h-5 w-5 text-green-500" />}
+            </div>
+            {receipt && (
+              <p className="text-sm text-muted-foreground">
+                Selected: {receipt.name}
+              </p>
+            )}
+          </div>
+
           <Button 
-            onClick={handleDeposit} 
-            disabled={loading} 
+            onClick={handleSubmit} 
+            disabled={uploading} 
             className="w-full"
             variant="bet"
           >
-            {loading ? "Processing..." : "Deposit Now"}
+            {uploading ? (
+              <>
+                <Upload className="mr-2 h-4 w-4 animate-pulse" />
+                Uploading...
+              </>
+            ) : (
+              "Submit Receipt"
+            )}
           </Button>
+
+          <p className="text-xs text-muted-foreground text-center">
+            Your deposit will be credited after admin verification (usually within 24 hours)
+          </p>
         </div>
       </DialogContent>
     </Dialog>

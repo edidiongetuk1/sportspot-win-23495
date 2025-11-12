@@ -172,6 +172,48 @@ export type Database = {
         }
         Relationships: []
       }
+      deposit_receipts: {
+        Row: {
+          admin_notes: string | null
+          ai_verification_result: Json | null
+          amount: number
+          approved_at: string | null
+          approved_by: string | null
+          id: string
+          receipt_url: string
+          status: string
+          submitted_at: string
+          user_id: string
+          verified_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          ai_verification_result?: Json | null
+          amount: number
+          approved_at?: string | null
+          approved_by?: string | null
+          id?: string
+          receipt_url: string
+          status?: string
+          submitted_at?: string
+          user_id: string
+          verified_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          ai_verification_result?: Json | null
+          amount?: number
+          approved_at?: string | null
+          approved_by?: string | null
+          id?: string
+          receipt_url?: string
+          status?: string
+          submitted_at?: string
+          user_id?: string
+          verified_at?: string | null
+        }
+        Relationships: []
+      }
       matches: {
         Row: {
           competition: string

@@ -12,6 +12,8 @@ import { User } from "@supabase/supabase-js";
 import { format } from "date-fns";
 import { WithdrawalManagement } from "@/components/admin/WithdrawalManagement";
 import { TransactionsManagement } from "@/components/admin/TransactionsManagement";
+import { AdminVerificationPanel } from "@/components/wagers/AdminVerificationPanel";
+import { DepositVerificationPanel } from "@/components/admin/DepositVerificationPanel";
 
 interface Match {
   id: string;
@@ -226,6 +228,8 @@ export default function AdminDashboard() {
         <Tabs defaultValue="matches" className="w-full">
           <TabsList className="mb-6">
             <TabsTrigger value="matches">Matches</TabsTrigger>
+            <TabsTrigger value="deposits">Deposits</TabsTrigger>
+            <TabsTrigger value="wagers">Wager Proofs</TabsTrigger>
             <TabsTrigger value="withdrawals">Withdrawals</TabsTrigger>
             <TabsTrigger value="transactions">Transactions</TabsTrigger>
           </TabsList>
@@ -398,6 +402,14 @@ export default function AdminDashboard() {
             </div>
           )}
         </div>
+          </TabsContent>
+
+          <TabsContent value="deposits">
+            <DepositVerificationPanel />
+          </TabsContent>
+
+          <TabsContent value="wagers">
+            <AdminVerificationPanel />
           </TabsContent>
 
           <TabsContent value="withdrawals">
