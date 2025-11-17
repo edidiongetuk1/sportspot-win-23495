@@ -53,9 +53,9 @@ const AviatorGame = ({ user, balance, onBalanceUpdate }: AviatorGameProps) => {
 
   const generateCrashPoint = () => {
     const rand = Math.random();
-    if (rand < 0.33) return 1.0 + Math.random() * 1.5;
-    if (rand < 0.66) return 1.5 + Math.random() * 3;
-    return 3 + Math.random() * 7;
+    if (rand < 0.75) return 1.0 + Math.random() * 1.5; // 75% chance: 1.0x to 2.5x
+    if (rand < 0.92) return 2.5 + Math.random() * 2.5; // 17% chance: 2.5x to 5.0x
+    return 5 + Math.random() * 5; // 8% chance: 5.0x to 10.0x
   };
 
   const startRound = async () => {
