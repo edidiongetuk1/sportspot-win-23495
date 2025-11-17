@@ -48,6 +48,44 @@ All colors MUST be HSL.
     
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
+
+  .light {
+    --background: 0 0% 98%;
+    --foreground: 142 20% 10%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 142 20% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 142 20% 10%;
+
+    --primary: 142 76% 36%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 142 76% 45%;
+
+    --secondary: 142 20% 92%;
+    --secondary-foreground: 142 20% 10%;
+
+    --muted: 142 20% 94%;
+    --muted-foreground: 142 8% 40%;
+
+    --accent: 46 38% 54%;
+    --accent-foreground: 0 0% 98%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 142 20% 88%;
+    --input: 142 20% 88%;
+    --ring: 142 76% 36%;
+
+    --gradient-primary: linear-gradient(135deg, hsl(142 76% 36%), hsl(142 76% 45%));
+    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%), hsl(142 20% 98%));
+    --gradient-accent: linear-gradient(135deg, hsl(46 38% 54%), hsl(46 38% 62%));
+    
+    --shadow-glow: 0 0 30px hsl(142 76% 36% / 0.2);
+    --shadow-card: 0 8px 24px hsl(0 0% 0% / 0.1);
+  }
 }
 
 @layer base {
