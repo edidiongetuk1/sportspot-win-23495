@@ -3,6 +3,7 @@ import { Wallet, User, LogOut, Plus, Menu } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 interface NavbarProps {
   balance?: number;
   isAuthenticated?: boolean;
@@ -58,6 +59,7 @@ export const Navbar = ({
                   <Plus className="w-4 h-4 mr-1" />
                   Deposit
                 </Button>
+                <ThemeSwitcher />
                 <Button variant="ghost" size="sm" asChild>
                   <Link to="/dashboard">Dashboard</Link>
                 </Button>
