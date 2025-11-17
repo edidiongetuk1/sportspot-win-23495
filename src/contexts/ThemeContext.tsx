@@ -1,10 +1,13 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 
 type AccentColor = 'husk' | 'gold' | 'blue' | 'purple' | 'red';
+type ThemeMode = 'light' | 'dark';
 
 interface ThemeContextType {
   accentColor: AccentColor;
   setAccentColor: (color: AccentColor) => void;
+  mode: ThemeMode;
+  toggleMode: () => void;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -43,6 +46,11 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     return (saved as AccentColor) || 'husk';
   });
 
+  const [mode, setMode] = useState<ThemeMode>(() => {
+    const saved = localStorage.getItem('theme-mode');
+    return (saved as ThemeMode) || 'dark';
+  });
+
   useEffect(() => {
     const root = document.documentElement;
     const colors = accentColors[accentColor];
@@ -54,12 +62,26 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('accent-color', accentColor);
   }, [accentColor]);
 
+  useEffect(() => {
+    const root = document.documentElement;
+    if (mode === 'light') {
+      root.classList.add('light');
+    } else {
+      root.classList.remove('light');
+    }
+    localStorage.setItem('theme-mode', mode);
+  }, [mode]);
+
   const setAccentColor = (color: AccentColor) => {
     setAccentColorState(color);
   };
 
+  const toggleMode = () => {
+    setMode(prev => prev === 'dark' ? 'light' : 'dark');
+  };
+
   return (
-    <ThemeContext.Provider value={{ accentColor, setAccentColor }}>
+    <ThemeContext.Provider value={{ accentColor, setAccentColor, mode, toggleMode }}>
       {children}
     </ThemeContext.Provider>
   );
