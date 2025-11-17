@@ -22,6 +22,8 @@ const AviatorGame = ({ user, balance, onBalanceUpdate }: AviatorGameProps) => {
   const [currentBetId, setCurrentBetId] = useState<string | null>(null);
   const [countdown, setCountdown] = useState(5);
   const [history, setHistory] = useState<number[]>([]);
+  const [autoCashoutEnabled, setAutoCashoutEnabled] = useState(false);
+  const [autoCashoutTarget, setAutoCashoutTarget] = useState("");
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
 
@@ -75,6 +77,15 @@ const AviatorGame = ({ user, balance, onBalanceUpdate }: AviatorGameProps) => {
       }
     }, 50);
   };
+
+  useEffect(() => {
+    if (autoCashoutEnabled && isBetPlaced && !hasCashedOut && isFlying) {
+      const target = parseFloat(autoCashoutTarget);
+      if (!isNaN(target) && multiplier >= target) {
+        cashOut();
+      }
+    }
+  }, [multiplier, autoCashoutEnabled, isBetPlaced, hasCashedOut, isFlying, autoCashoutTarget]);
 
   const endRound = async (crashPoint: number) => {
     setIsFlying(false);
@@ -130,6 +141,18 @@ const AviatorGame = ({ user, balance, onBalanceUpdate }: AviatorGameProps) => {
         variant: "destructive",
       });
       return;
+    }
+
+    if (autoCashoutEnabled) {
+      const target = parseFloat(autoCashoutTarget);
+      if (isNaN(target) || target <= 1.0) {
+        toast({
+          title: "Invalid Auto-Cashout",
+          description: "Target multiplier must be greater than 1.0x",
+          variant: "destructive",
+        });
+        return;
+      }
     }
 
     const { data: bet, error } = await supabase
@@ -255,6 +278,41 @@ const AviatorGame = ({ user, balance, onBalanceUpdate }: AviatorGameProps) => {
               onChange={(e) => setBetAmount(e.target.value)}
               disabled={isBetPlaced}
             />
+          </div>
+
+          <div className="space-y-3 p-3 border border-border rounded-lg bg-muted/50">
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="auto-cashout"
+                checked={autoCashoutEnabled}
+                onChange={(e) => setAutoCashoutEnabled(e.target.checked)}
+                disabled={isBetPlaced}
+                className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
+              />
+              <label
+                htmlFor="auto-cashout"
+                className="text-sm font-medium leading-none cursor-pointer"
+              >
+                Auto Cash Out
+              </label>
+            </div>
+            
+            {autoCashoutEnabled && (
+              <div>
+                <label className="text-xs text-muted-foreground mb-1 block">Target Multiplier</label>
+                <Input
+                  type="number"
+                  placeholder="2.00"
+                  step="0.01"
+                  min="1.01"
+                  value={autoCashoutTarget}
+                  onChange={(e) => setAutoCashoutTarget(e.target.value)}
+                  disabled={isBetPlaced}
+                  className="h-8"
+                />
+              </div>
+            )}
           </div>
 
           {!isBetPlaced ? (
