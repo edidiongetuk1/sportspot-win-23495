@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, Trash2 } from "lucide-react";
 
 interface Bet {
   id: string;
@@ -74,6 +74,33 @@ export const MyBetsTab = ({ userId }: MyBetsTabProps) => {
     return matchId.startsWith("uploaded_");
   };
 
+  const handleDeleteBet = async (betId: string) => {
+    if (!confirm("Are you sure you want to delete this bet? This action cannot be undone.")) {
+      return;
+    }
+
+    const { error } = await supabase
+      .from("bets")
+      .delete()
+      .eq("id", betId);
+
+    if (error) {
+      console.error("Error deleting bet:", error);
+      toast({
+        title: "Error deleting bet",
+        description: "Please try again",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    toast({
+      title: "Bet deleted",
+      description: "Your bet has been removed from history",
+    });
+    fetchMyBets();
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -118,17 +145,27 @@ export const MyBetsTab = ({ userId }: MyBetsTabProps) => {
                     Placed {format(new Date(bet.created_at), "PPp")}
                   </p>
 
-                  {bet.result && isUploadedBet(bet.match_id) && (
+                  <div className="flex gap-2 mt-2">
+                    {bet.result && isUploadedBet(bet.match_id) && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => window.open(bet.result!, "_blank")}
+                      >
+                        <ExternalLink className="w-4 h-4 mr-2" />
+                        View Screenshot
+                      </Button>
+                    )}
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => window.open(bet.result!, "_blank")}
-                      className="mt-2"
+                      onClick={() => handleDeleteBet(bet.id)}
+                      className="text-destructive hover:text-destructive hover:bg-destructive/10"
                     >
-                      <ExternalLink className="w-4 h-4 mr-2" />
-                      View Screenshot
+                      <Trash2 className="w-4 h-4 mr-2" />
+                      Delete
                     </Button>
-                  )}
+                  </div>
                 </div>
               </div>
             </Card>

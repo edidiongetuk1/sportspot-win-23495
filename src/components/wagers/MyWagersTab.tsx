@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Upload, CheckCircle, Clock, XCircle } from "lucide-react";
+import { Upload, CheckCircle, Clock, XCircle, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { UploadProofDialog } from "./UploadProofDialog";
 
@@ -144,6 +144,33 @@ export const MyWagersTab = ({ userId, onBalanceUpdate }: MyWagersTabProps) => {
     }
   };
 
+  const handleDeleteWager = async (wagerId: string) => {
+    if (!confirm("Are you sure you want to delete this wager? This action cannot be undone.")) {
+      return;
+    }
+
+    const { error } = await supabase
+      .from("mobile_wagers")
+      .delete()
+      .eq("id", wagerId);
+
+    if (error) {
+      console.error("Error deleting wager:", error);
+      toast({
+        title: "Error deleting wager",
+        description: "Please try again",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    toast({
+      title: "Wager deleted",
+      description: "Your wager has been removed from history",
+    });
+    fetchMyWagers();
+  };
+
 
   const getStatusBadge = async (wager: MyWager) => {
     if (wager.status === "open") {
@@ -265,6 +292,16 @@ export const MyWagersTab = ({ userId, onBalanceUpdate }: MyWagersTabProps) => {
                   <p className="text-sm text-muted-foreground">
                     Created {format(new Date(wager.created_at), "PPp")}
                   </p>
+
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleDeleteWager(wager.id)}
+                    className="text-destructive hover:text-destructive hover:bg-destructive/10 w-fit mt-2"
+                  >
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Delete
+                  </Button>
                 </div>
 
                 <div className="flex items-center gap-3">
