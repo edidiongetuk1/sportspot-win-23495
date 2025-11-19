@@ -10,35 +10,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { GameSelectionGrid } from "./GameSelectionGrid";
 
-interface CreateWagerDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  userBalance: number;
-  onWagerCreated: () => void;
-}
-
-const GAME_TYPES = [
-  { value: "eFootball FC Mobile", label: "eFootball FC Mobile" },
-  { value: "FIFA Mobile", label: "FIFA Mobile" },
-  { value: "Call of Duty Mobile", label: "Call of Duty Mobile" },
-  { value: "PUBG Mobile", label: "PUBG Mobile" },
-  { value: "Mobile Legends", label: "Mobile Legends" },
-];
-
-export const CreateWagerDialog = ({
-  open,
-  onOpenChange,
-  userBalance,
-  onWagerCreated,
 }: CreateWagerDialogProps) => {
   const [gameType, setGameType] = useState("");
   const [stakeAmount, setStakeAmount] = useState("");
@@ -142,21 +116,10 @@ export const CreateWagerDialog = ({
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="gameType">Game Type</Label>
-            <Select value={gameType} onValueChange={setGameType}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select a game" />
-              </SelectTrigger>
-              <SelectContent>
-                {GAME_TYPES.map((game) => (
-                  <SelectItem key={game.value} value={game.value}>
-                    {game.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <GameSelectionGrid
+            selectedGame={gameType}
+            onSelectGame={setGameType}
+          />
 
           <div className="space-y-2">
             <Label htmlFor="stake">Stake Amount</Label>
