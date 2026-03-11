@@ -13,6 +13,18 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { GameSelectionGrid } from "./GameSelectionGrid";
 
+interface CreateWagerDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  userBalance: number;
+  onWagerCreated: () => void;
+}
+
+export const CreateWagerDialog = ({
+  open,
+  onOpenChange,
+  userBalance,
+  onWagerCreated,
 }: CreateWagerDialogProps) => {
   const [gameType, setGameType] = useState("");
   const [stakeAmount, setStakeAmount] = useState("");
