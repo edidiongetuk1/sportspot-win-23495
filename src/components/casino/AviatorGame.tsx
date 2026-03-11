@@ -24,7 +24,7 @@ const AviatorGame = ({ user, balance, onBalanceUpdate }: AviatorGameProps) => {
   const [history, setHistory] = useState<number[]>([]);
   const [autoCashoutEnabled, setAutoCashoutEnabled] = useState(false);
   const [autoCashoutTarget, setAutoCashoutTarget] = useState("");
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
