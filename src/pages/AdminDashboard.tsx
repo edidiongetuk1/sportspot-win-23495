@@ -14,6 +14,7 @@ import { WithdrawalManagement } from "@/components/admin/WithdrawalManagement";
 import { TransactionsManagement } from "@/components/admin/TransactionsManagement";
 import { AdminVerificationPanel } from "@/components/wagers/AdminVerificationPanel";
 import { DepositVerificationPanel } from "@/components/admin/DepositVerificationPanel";
+import { WebhookHashTester } from "@/components/admin/WebhookHashTester";
 
 interface Match {
   id: string;
@@ -232,6 +233,7 @@ export default function AdminDashboard() {
             <TabsTrigger value="wagers">Wager Proofs</TabsTrigger>
             <TabsTrigger value="withdrawals">Withdrawals</TabsTrigger>
             <TabsTrigger value="transactions">Transactions</TabsTrigger>
+            <TabsTrigger value="webhook">Verify Webhook</TabsTrigger>
           </TabsList>
 
           <TabsContent value="matches" className="space-y-8">
@@ -418,6 +420,10 @@ export default function AdminDashboard() {
 
           <TabsContent value="transactions">
             <TransactionsManagement />
+          </TabsContent>
+
+          <TabsContent value="webhook">
+            <WebhookHashTester />
           </TabsContent>
         </Tabs>
       </main>
