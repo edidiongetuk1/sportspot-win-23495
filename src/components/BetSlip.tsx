@@ -33,21 +33,26 @@ export const BetSlip = ({ bets, onRemoveBet, onClearAll, onPlaceBet, userBalance
   };
 
   return (
-    <Card className="bg-gradient-card border-border sticky top-4 animate-scale-in">
-      <div className="p-4 border-b border-border">
-        <div className="flex items-center justify-between">
-          <h3 className="font-bold text-lg">Bet Slip</h3>
+    <Card className="bg-card border-border sticky top-4 animate-scale-in overflow-hidden rounded-3xl">
+      <div className="px-5 py-4 border-b border-border flex items-center justify-between bg-secondary/40">
+        <div className="flex items-center gap-2">
+          <h3 className="font-display font-extrabold text-sm uppercase tracking-[0.25em]">Bet Slip</h3>
           {bets.length > 0 && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onClearAll}
-              className="text-muted-foreground hover:text-destructive hover:scale-110 transition-all duration-300"
-            >
-              Clear All
-            </Button>
+            <span className="font-mono text-[10px] font-bold bg-primary text-primary-foreground px-1.5 py-0.5 rounded">
+              {bets.length}
+            </span>
           )}
         </div>
+        {bets.length > 0 && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onClearAll}
+            className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground hover:text-destructive"
+          >
+            Clear
+          </Button>
+        )}
       </div>
 
       <div className="p-4 space-y-4">
