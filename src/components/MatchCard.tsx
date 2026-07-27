@@ -1,7 +1,4 @@
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, Clock } from "lucide-react";
 
 interface MatchCardProps {
   homeTeam: string;
@@ -12,8 +9,33 @@ interface MatchCardProps {
   startTime: string;
   league: string;
   isLive?: boolean;
+  homeScore?: number | null;
+  awayScore?: number | null;
   onBetClick: (team: string, odds: number) => void;
 }
+
+const OddsButton = ({
+  label,
+  value,
+  onClick,
+}: {
+  label: string;
+  value: number;
+  onClick: () => void;
+}) => (
+  <button
+    onClick={onClick}
+    className="group/btn flex flex-col items-center justify-center py-3 bg-secondary/60 border border-border rounded-xl transition-all duration-300 hover:bg-primary hover:border-primary hover:-translate-y-0.5 hover:shadow-gold"
+    style={{ boxShadow: "inset 0 1px 0 hsl(0 0% 100% / 0.03)" }}
+  >
+    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest group-hover/btn:text-primary-foreground/80">
+      {label}
+    </span>
+    <span className="font-mono text-lg font-bold text-primary group-hover/btn:text-primary-foreground">
+      {value.toFixed(2)}
+    </span>
+  </button>
+);
 
 export const MatchCard = ({
   homeTeam,
@@ -24,70 +46,67 @@ export const MatchCard = ({
   startTime,
   league,
   isLive = false,
+  homeScore,
+  awayScore,
   onBetClick,
 }: MatchCardProps) => {
   return (
-    <Card className="bg-gradient-card border-border hover:border-primary/50 transition-all duration-300 overflow-hidden group hover:shadow-glow hover:scale-[1.02] animate-fade-in">
-      <div className="p-4 space-y-4">
-        {/* League and Status */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Trophy className="w-4 h-4 text-primary group-hover:animate-bounce-subtle" />
-            <span className="text-sm text-muted-foreground">{league}</span>
-          </div>
-          {isLive ? (
-            <Badge className="bg-destructive text-destructive-foreground animate-pulse">
-              LIVE
-            </Badge>
-          ) : (
-            <div className="flex items-center gap-1 text-sm text-muted-foreground">
-              <Clock className="w-4 h-4" />
-              <span>{startTime}</span>
-            </div>
-          )}
+    <div className="group relative overflow-hidden rounded-3xl bg-card/60 backdrop-blur-sm border border-border p-5 md:p-6 transition-all duration-500 hover:border-primary/40 hover:bg-card/80 animate-fade-in">
+      {/* Soft gold corner glow on hover */}
+      <div className="pointer-events-none absolute -top-24 -right-24 w-64 h-64 rounded-full bg-primary/5 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+
+      {/* Header: league + status */}
+      <div className="flex items-center justify-between mb-5 relative">
+        <div className="flex items-center gap-2">
+          <span
+            className={`w-1.5 h-1.5 rounded-full ${
+              isLive ? "bg-primary animate-pulse" : "bg-muted-foreground/40"
+            }`}
+          />
+          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.18em]">
+            {league}
+          </span>
         </div>
+        {isLive ? (
+          <Badge className="bg-primary/10 text-primary border border-primary/20 hover:bg-primary/10 font-mono text-[10px] font-bold uppercase tracking-tight">
+            Live
+          </Badge>
+        ) : (
+          <span className="font-mono text-[11px] font-bold text-muted-foreground uppercase tracking-tight">
+            {startTime}
+          </span>
+        )}
+      </div>
 
-        {/* Teams */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="font-semibold text-foreground">{homeTeam}</span>
-            <Button
-              variant="bet"
-              size="sm"
-              onClick={() => onBetClick(homeTeam, homeOdds)}
-              className="min-w-[60px] hover:scale-110 transition-transform duration-300"
-            >
-              {homeOdds.toFixed(2)}
-            </Button>
-          </div>
-
-          {drawOdds && (
-            <div className="flex items-center justify-between">
-              <span className="font-semibold text-muted-foreground">Draw</span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onBetClick("Draw", drawOdds)}
-                className="min-w-[60px] hover:scale-110 transition-transform duration-300"
-              >
-                {drawOdds.toFixed(2)}
-              </Button>
-            </div>
-          )}
-
-          <div className="flex items-center justify-between">
-            <span className="font-semibold text-foreground">{awayTeam}</span>
-            <Button
-              variant="bet"
-              size="sm"
-              onClick={() => onBetClick(awayTeam, awayOdds)}
-              className="min-w-[60px] hover:scale-110 transition-transform duration-300"
-            >
-              {awayOdds.toFixed(2)}
-            </Button>
-          </div>
+      {/* Teams */}
+      <div className="space-y-3 mb-7 relative">
+        <div className="flex justify-between items-center">
+          <span className="text-base md:text-lg font-semibold text-foreground truncate pr-3">
+            {homeTeam}
+          </span>
+          <span className="text-xl font-black text-foreground/90 tabular font-mono">
+            {isLive && homeScore != null ? homeScore : "—"}
+          </span>
+        </div>
+        <div className="gold-hairline opacity-30" />
+        <div className="flex justify-between items-center">
+          <span className="text-base md:text-lg font-semibold text-foreground truncate pr-3">
+            {awayTeam}
+          </span>
+          <span className="text-xl font-black text-foreground/90 tabular font-mono">
+            {isLive && awayScore != null ? awayScore : "—"}
+          </span>
         </div>
       </div>
-    </Card>
+
+      {/* Odds grid */}
+      <div className={`grid ${drawOdds ? "grid-cols-3" : "grid-cols-2"} gap-2 relative`}>
+        <OddsButton label="1" value={homeOdds} onClick={() => onBetClick(homeTeam, homeOdds)} />
+        {drawOdds && (
+          <OddsButton label="X" value={drawOdds} onClick={() => onBetClick("Draw", drawOdds)} />
+        )}
+        <OddsButton label="2" value={awayOdds} onClick={() => onBetClick(awayTeam, awayOdds)} />
+      </div>
+    </div>
   );
 };

@@ -1,52 +1,56 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* Elite Noir Gold — SportSpot design system. All colors HSL. */
 
 @layer base {
   :root {
-    --background: 142 20% 8%;
-    --foreground: 0 0% 98%;
+    /* Noir surfaces */
+    --background: 0 0% 3%;              /* #080808 near-black */
+    --foreground: 0 0% 96%;
 
-    --card: 142 15% 12%;
-    --card-foreground: 0 0% 98%;
+    --card: 0 0% 7%;                    /* #121212 */
+    --card-foreground: 0 0% 96%;
 
-    --popover: 142 20% 10%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 0 0% 6%;
+    --popover-foreground: 0 0% 96%;
 
-    --primary: 142 76% 36%;
-    --primary-foreground: 0 0% 100%;
-    --primary-glow: 142 76% 45%;
+    /* Husk gold — the single accent */
+    --primary: 46 38% 54%;              /* husk RGB(183,162,94) */
+    --primary-foreground: 0 0% 6%;
+    --primary-glow: 46 55% 66%;
 
-    --secondary: 142 30% 20%;
-    --secondary-foreground: 0 0% 98%;
+    --secondary: 0 0% 10%;
+    --secondary-foreground: 0 0% 96%;
 
-    --muted: 142 15% 15%;
-    --muted-foreground: 142 8% 60%;
+    --muted: 0 0% 12%;
+    --muted-foreground: 0 0% 60%;
 
     --accent: 46 38% 54%;
-    --accent-foreground: 0 0% 98%;
+    --accent-foreground: 0 0% 6%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 142 20% 18%;
-    --input: 142 20% 18%;
-    --ring: 142 76% 36%;
+    --border: 0 0% 14%;                 /* hairline */
+    --input: 0 0% 14%;
+    --ring: 46 38% 54%;
 
-    --radius: 0.75rem;
+    --radius: 1rem;
 
-    --gradient-primary: linear-gradient(135deg, hsl(142 76% 36%), hsl(142 76% 45%));
-    --gradient-card: linear-gradient(180deg, hsl(142 15% 14%), hsl(142 15% 10%));
-    --gradient-accent: linear-gradient(135deg, hsl(46 38% 54%), hsl(46 38% 62%));
-    
-    --shadow-glow: 0 0 30px hsl(142 76% 36% / 0.3);
-    --shadow-card: 0 8px 24px hsl(0 0% 0% / 0.4);
-    
-    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --gradient-primary: linear-gradient(135deg, hsl(46 38% 46%), hsl(46 55% 66%));
+    --gradient-card: linear-gradient(180deg, hsl(0 0% 8%), hsl(0 0% 5%));
+    --gradient-accent: linear-gradient(135deg, hsl(46 38% 54%), hsl(46 55% 66%));
+    --gradient-gold: linear-gradient(135deg, hsl(46 55% 62%), hsl(46 45% 46%));
+
+    --shadow-glow: 0 0 40px hsl(46 55% 55% / 0.18);
+    --shadow-card: 0 12px 40px hsl(0 0% 0% / 0.5);
+    --shadow-gold: 0 20px 60px -20px hsl(46 55% 50% / 0.35);
+
+    --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
@@ -55,7 +59,58 @@ All colors MUST be HSL.
     @apply border-border;
   }
 
-  body {
+  html, body {
     @apply bg-background text-foreground;
+    font-family: 'DM Sans', system-ui, sans-serif;
+    font-feature-settings: 'ss01', 'cv11';
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    letter-spacing: -0.02em;
+  }
+
+  .font-mono, .tabular {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Subtle noise for premium noir feel */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+}
+
+@layer utilities {
+  .text-gold {
+    color: hsl(var(--primary));
+  }
+  .bg-gold {
+    background-color: hsl(var(--primary));
+  }
+  .border-gold {
+    border-color: hsl(var(--primary));
+  }
+  .gold-hairline {
+    background: linear-gradient(90deg, transparent, hsl(var(--primary) / 0.6), transparent);
+    height: 1px;
+  }
+  .glow-gold {
+    box-shadow: 0 0 24px hsl(var(--primary) / 0.35);
+  }
+  .shimmer-gold {
+    background: linear-gradient(110deg, hsl(var(--primary) / 0) 30%, hsl(var(--primary-glow) / 0.6) 50%, hsl(var(--primary) / 0) 70%);
+    background-size: 200% 100%;
+    animation: shimmer 2.5s linear infinite;
+  }
+  @keyframes shimmer {
+    to { background-position: -200% 0; }
   }
 }
