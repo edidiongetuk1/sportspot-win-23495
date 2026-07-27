@@ -265,7 +265,7 @@ const Index = () => {
                       Upload Bet Slip
                     </Button>}
                 </div>
-                {matches.length === 0 ? <p className="text-muted-foreground">No matches available</p> : <div className="grid gap-4">
+                {matches.length === 0 ? <p className="text-muted-foreground">No matches available</p> : <div className="grid gap-4 md:grid-cols-2">
                     {matches.map(match => <MatchCard key={match.id} homeTeam={match.team1} awayTeam={match.team2} homeOdds={Number(match.odds_team1_win)} drawOdds={Number(match.odds_draw)} awayOdds={Number(match.odds_team2_win)} startTime={format(new Date(match.match_date), "HH:mm")} league={match.competition} isLive={false} onBetClick={(team, odds) => handleBetClick(match.id, team, odds)} />)}
                   </div>}
               </TabsContent>
