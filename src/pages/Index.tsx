@@ -259,7 +259,7 @@ const Index = () => {
 
               <TabsContent value="football" className="space-y-4 mt-6">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-2xl font-bold">Featured Matches</h2>
+                  <h2 className="font-display text-3xl md:text-4xl font-extrabold tracking-tighter">Featured <span className="text-primary">Markets</span></h2>
                   {user && <Button variant="bet" onClick={() => setIsUploadDialogOpen(true)} className="gap-2">
                       <Upload className="w-4 h-4" />
                       Upload Bet Slip
