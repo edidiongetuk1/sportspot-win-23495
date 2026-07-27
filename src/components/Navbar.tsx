@@ -19,17 +19,18 @@ export const Navbar = ({
   onDepositClick
 }: NavbarProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  return <nav className="border-b border-border bg-card/50 backdrop-blur-lg sticky top-0 z-50 animate-fade-in-down">
+  return <nav className="border-b border-border bg-background/80 backdrop-blur-xl sticky top-0 z-50 animate-fade-in-down">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 group">
-            <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-primary flex items-center justify-center rounded-md bg-[#2e6f88] transition-all duration-300 group-hover:shadow-glow group-hover:scale-110">
-              <span className="text-xl md:text-2xl font-bold text-primary-foreground">​𝑮
-            </span>
+          <Link to="/" className="flex items-center gap-2.5 group">
+            <div className="relative w-9 h-9 md:w-10 md:h-10 rounded-xl bg-gradient-accent flex items-center justify-center shadow-gold transition-transform duration-300 group-hover:scale-105">
+              <span className="font-display text-lg md:text-xl font-black text-primary-foreground">S</span>
+              <div className="absolute inset-0 rounded-xl ring-1 ring-primary/40" />
             </div>
-            <span className="text-lg md:text-xl font-bold bg-gradient-primary bg-clip-text text-transparent transition-all duration-300 group-hover:scale-105">​GameX
-          </span>
+            <span className="font-display text-lg md:text-xl font-extrabold tracking-tight text-foreground">
+              Sport<span className="text-primary">Spot</span>
+            </span>
           </Link>
 
           {/* Desktop Navigation Links */}
