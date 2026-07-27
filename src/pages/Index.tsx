@@ -186,34 +186,61 @@ const Index = () => {
   return <div className="min-h-screen bg-background">
       <Navbar balance={balance} isAuthenticated={!!user} onLogout={handleLogout} isAdmin={isAdmin} onDepositClick={() => setDepositDialogOpen(true)} />
 
-      {/* Hero Section */}
-      <div className="relative h-[400px] overflow-hidden">
-        <div className="absolute inset-0 bg-cover bg-center" style={{
-        backgroundImage: `url(${heroImage})`
-      }}>
-          <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-transparent" />
-        </div>
-        <div className="relative container mx-auto px-4 h-full flex items-center">
-          <div className="max-w-xl space-y-6">
-            <h1 className="text-5xl md:text-6xl font-bold">
-              <span className="bg-gradient-primary bg-clip-text text-transparent">
-                Win Big
-              </span>
-              <br />
-              <span className="text-foreground">On Every Game</span>
-            </h1>
-            <p className="font-semibold text-sm text-slate-50">From the arena to the odds  GameX is where gamers win</p>
-            <div className="flex gap-4">
-              <Button variant="bet" size="lg">
-                Start Betting
-              </Button>
-              <Button variant="outline" size="lg">
-                View Live Matches
-              </Button>
+      {/* Hero Section — Elite Noir Gold */}
+      <section className="relative">
+        <div className="container mx-auto px-4 pt-10 md:pt-16 pb-10">
+          <div className="relative overflow-hidden rounded-[2.5rem] bg-card border border-border shadow-card">
+            {/* Ambient gold glow */}
+            <div className="absolute -top-24 -left-24 w-[28rem] h-[28rem] bg-primary/10 blur-[120px] rounded-full pointer-events-none" />
+            <div className="absolute -bottom-32 -right-24 w-[28rem] h-[28rem] bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
+
+            <div className="relative p-8 md:p-14 flex flex-col md:flex-row md:items-end justify-between gap-10">
+              <div className="space-y-5 max-w-xl">
+                <div className="flex items-center gap-3">
+                  <div className="h-px w-10 bg-primary" />
+                  <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">
+                    Exclusive Markets
+                  </span>
+                </div>
+                <h1 className="font-display text-5xl md:text-7xl font-extrabold text-foreground tracking-tighter leading-[0.95]">
+                  Sport<span className="text-primary">Spot</span>
+                </h1>
+                <p className="text-muted-foreground text-base md:text-lg leading-relaxed max-w-md">
+                  The continent's most advanced betting engine. Live, fast, and secure.
+                </p>
+                <div className="flex flex-wrap gap-3 pt-2">
+                  <Button variant="bet" size="lg" className="font-bold uppercase tracking-widest text-xs">
+                    Start Betting
+                  </Button>
+                  <Button variant="outline" size="lg" className="font-bold uppercase tracking-widest text-xs border-border hover:border-primary hover:text-primary">
+                    View Live
+                  </Button>
+                </div>
+              </div>
+
+              {/* Featured in-play ticker */}
+              <div className="flex flex-col items-start md:items-end">
+                <div className="text-[10px] font-bold text-muted-foreground uppercase mb-3 tracking-[0.25em]">
+                  Featured In-Play
+                </div>
+                <div className="bg-background/70 backdrop-blur-md border border-border rounded-2xl p-4 flex items-center gap-4 md:gap-6">
+                  <div className="text-center">
+                    <div className="font-display text-lg font-bold text-foreground tracking-tight">ARS</div>
+                    <div className="text-[10px] text-muted-foreground font-bold uppercase tracking-tight">Arsenal</div>
+                  </div>
+                  <div className="font-mono text-xl font-black text-primary">2.45</div>
+                  <div className="text-muted-foreground/50 font-bold italic text-xs">VS</div>
+                  <div className="font-mono text-xl font-black text-primary">3.10</div>
+                  <div className="text-center">
+                    <div className="font-display text-lg font-bold text-foreground tracking-tight">MCI</div>
+                    <div className="text-[10px] text-muted-foreground font-bold uppercase tracking-tight">Man City</div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8">
