@@ -248,13 +248,13 @@ const Index = () => {
           {/* Matches Section */}
           <div className="lg:col-span-2 space-y-6">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="w-full justify-start bg-card border border-border overflow-x-auto">
-                <TabsTrigger value="football">Football</TabsTrigger>
-                <TabsTrigger value="my-bets">My Bets</TabsTrigger>
-                <TabsTrigger value="basketball">Basketball</TabsTrigger>
-                <TabsTrigger value="tennis">Tennis</TabsTrigger>
-                <TabsTrigger value="live">Live Now</TabsTrigger>
-                <TabsTrigger value="casino" onClick={() => navigate("/casino")}>🎰 Casino</TabsTrigger>
+              <TabsList className="w-full justify-start bg-card/60 backdrop-blur-sm border border-border overflow-x-auto rounded-2xl p-1.5">
+                <TabsTrigger value="football" className="uppercase tracking-widest text-xs font-bold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-xl">Football</TabsTrigger>
+                <TabsTrigger value="my-bets" className="uppercase tracking-widest text-xs font-bold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-xl">My Bets</TabsTrigger>
+                <TabsTrigger value="basketball" className="uppercase tracking-widest text-xs font-bold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-xl">Basketball</TabsTrigger>
+                <TabsTrigger value="tennis" className="uppercase tracking-widest text-xs font-bold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-xl">Tennis</TabsTrigger>
+                <TabsTrigger value="live" className="uppercase tracking-widest text-xs font-bold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-xl">Live</TabsTrigger>
+                <TabsTrigger value="casino" onClick={() => navigate("/casino")} className="uppercase tracking-widest text-xs font-bold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-xl">Casino</TabsTrigger>
               </TabsList>
 
               <TabsContent value="football" className="space-y-4 mt-6">
