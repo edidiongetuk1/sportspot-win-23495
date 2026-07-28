@@ -281,9 +281,17 @@ const Index = () => {
                       Upload Bet Slip
                     </Button>}
                 </div>
-                {matches.length === 0 ? <p className="text-muted-foreground">No matches available</p> : <div className="grid gap-4 md:grid-cols-2">
-                    {matches.map(match => <MatchCard key={match.id} homeTeam={match.team1} awayTeam={match.team2} homeOdds={Number(match.odds_team1_win)} drawOdds={Number(match.odds_draw)} awayOdds={Number(match.odds_team2_win)} startTime={format(new Date(match.match_date), "HH:mm")} league={match.competition} isLive={false} onBetClick={(team, odds) => handleBetClick(match.id, team, odds)} />)}
-                  </div>}
+                {matchesLoading ? (
+                  <div className="grid gap-4 md:grid-cols-2">
+                    {Array.from({ length: 4 }).map((_, i) => <MatchCardSkeleton key={i} />)}
+                  </div>
+                ) : matches.length === 0 ? (
+                  <p className="text-muted-foreground">No matches available</p>
+                ) : (
+                  <div className="grid gap-4 md:grid-cols-2 transition-all duration-500">
+                    {matches.map(match => <MatchCard key={match.id} homeTeam={match.team1} awayTeam={match.team2} homeOdds={Number(match.odds_team1_win)} drawOdds={Number(match.odds_draw)} awayOdds={Number(match.odds_team2_win)} startTime={format(new Date(match.match_date), "HH:mm")} league={match.competition} isLive={match.status === "live"} homeScore={(match as any).team1_score} awayScore={(match as any).team2_score} onBetClick={(team, odds) => handleBetClick(match.id, team, odds)} />)}
+                  </div>
+                )}
               </TabsContent>
 
               <TabsContent value="my-bets" className="space-y-4 mt-6">
