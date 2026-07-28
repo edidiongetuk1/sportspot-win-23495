@@ -50,6 +50,16 @@ const Index = () => {
   useEffect(() => {
     fetchMatches();
 
+    // Realtime updates for matches (live scores + status)
+    const channel = supabase
+      .channel("matches-live")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "matches" },
+        () => fetchMatches()
+      )
+      .subscribe();
+
     // Set up auth state listener
     const {
       data: {
@@ -80,18 +90,22 @@ const Index = () => {
         checkAdminRole(session.user.id);
       }
     });
-    return () => subscription.unsubscribe();
+    return () => {
+      subscription.unsubscribe();
+      supabase.removeChannel(channel);
+    };
   }, []);
   const fetchMatches = async () => {
     const {
       data,
       error
-    } = await supabase.from("matches").select("*").eq("status", "upcoming").order("match_date", {
+    } = await supabase.from("matches").select("*").in("status", ["upcoming", "live"]).order("match_date", {
       ascending: true
     });
     if (!error && data) {
       setMatches(data);
     }
+    setMatchesLoading(false);
   };
   const fetchProfile = async (userId: string) => {
     const {
