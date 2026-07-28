@@ -188,6 +188,16 @@ Deno.serve(async (req) => {
           console.error(`Error updating balance for user ${bet.user_id}:`, balanceError);
         } else {
           console.log(`Credited ${bet.potential_win} to user ${bet.user_id}. New balance: ${newBalance}`);
+          await supabase.from('audit_logs').insert({
+            user_id: bet.user_id,
+            action_type: 'bet_won',
+            amount: Number(bet.potential_win),
+            balance_before: Number(profile.balance),
+            balance_after: newBalance,
+            reference_id: bet.id,
+            reference_type: 'bet',
+            metadata: { match_id: matchId, selection: bet.selection, winning_selection: winningSelection },
+          });
         }
       } else {
         losersCount++;
