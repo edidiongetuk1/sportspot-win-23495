@@ -15,6 +15,9 @@ import { TransactionsManagement } from "@/components/admin/TransactionsManagemen
 import { AdminVerificationPanel } from "@/components/wagers/AdminVerificationPanel";
 import { DepositVerificationPanel } from "@/components/admin/DepositVerificationPanel";
 import { WebhookHashTester } from "@/components/admin/WebhookHashTester";
+import { SettlementDiagnostics } from "@/components/admin/SettlementDiagnostics";
+import { SettledBetsAudit } from "@/components/admin/SettledBetsAudit";
+import { WalletActivityLog } from "@/components/WalletActivityLog";
 
 interface Match {
   id: string;
@@ -227,8 +230,11 @@ export default function AdminDashboard() {
         </div>
 
         <Tabs defaultValue="matches" className="w-full">
-          <TabsList className="mb-6">
+          <TabsList className="mb-6 flex-wrap h-auto">
             <TabsTrigger value="matches">Matches</TabsTrigger>
+            <TabsTrigger value="diagnostics">Diagnostics</TabsTrigger>
+            <TabsTrigger value="settled-bets">Settled Bets</TabsTrigger>
+            <TabsTrigger value="wallet-activity">Wallet Activity</TabsTrigger>
             <TabsTrigger value="deposits">Deposits</TabsTrigger>
             <TabsTrigger value="wagers">Wager Proofs</TabsTrigger>
             <TabsTrigger value="withdrawals">Withdrawals</TabsTrigger>
@@ -404,6 +410,18 @@ export default function AdminDashboard() {
             </div>
           )}
         </div>
+          </TabsContent>
+
+          <TabsContent value="diagnostics">
+            <SettlementDiagnostics />
+          </TabsContent>
+
+          <TabsContent value="settled-bets">
+            <SettledBetsAudit />
+          </TabsContent>
+
+          <TabsContent value="wallet-activity">
+            <WalletActivityLog adminView />
           </TabsContent>
 
           <TabsContent value="deposits">

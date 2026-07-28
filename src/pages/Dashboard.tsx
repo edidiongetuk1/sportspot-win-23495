@@ -11,6 +11,7 @@ import { format } from "date-fns";
 import { WithdrawalDialog } from "@/components/WithdrawalDialog";
 import { DepositDialog } from "@/components/DepositDialog";
 import { AuditLogsList } from "@/components/AuditLogsList";
+import { WalletActivityLog } from "@/components/WalletActivityLog";
 
 interface Bet {
   id: string;
@@ -224,6 +225,10 @@ export default function Dashboard() {
               {bets.filter(bet => bet.status === 'pending').length}
             </p>
           </Card>
+        </div>
+
+        <div className="mb-8">
+          <WalletActivityLog />
         </div>
 
         <div className="mb-8">
