@@ -11,6 +11,7 @@ import { format } from "date-fns";
 import { WithdrawalDialog } from "@/components/WithdrawalDialog";
 import { DepositDialog } from "@/components/DepositDialog";
 import { AuditLogsList } from "@/components/AuditLogsList";
+import { WalletActivityLog } from "@/components/WalletActivityLog";
 
 interface Bet {
   id: string;
