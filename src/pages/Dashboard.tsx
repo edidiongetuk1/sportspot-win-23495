@@ -227,6 +227,10 @@ export default function Dashboard() {
         </div>
 
         <div className="mb-8">
+          <WalletActivityLog />
+        </div>
+
+        <div className="mb-8">
           <AuditLogsList />
         </div>
 
