@@ -230,8 +230,11 @@ export default function AdminDashboard() {
         </div>
 
         <Tabs defaultValue="matches" className="w-full">
-          <TabsList className="mb-6">
+          <TabsList className="mb-6 flex-wrap h-auto">
             <TabsTrigger value="matches">Matches</TabsTrigger>
+            <TabsTrigger value="diagnostics">Diagnostics</TabsTrigger>
+            <TabsTrigger value="settled-bets">Settled Bets</TabsTrigger>
+            <TabsTrigger value="wallet-activity">Wallet Activity</TabsTrigger>
             <TabsTrigger value="deposits">Deposits</TabsTrigger>
             <TabsTrigger value="wagers">Wager Proofs</TabsTrigger>
             <TabsTrigger value="withdrawals">Withdrawals</TabsTrigger>
