@@ -75,10 +75,40 @@ Deno.serve(async (req) => {
 
     console.log(`Processing match ${matchId} with result: ${result}`);
 
+    // Fetch match to resolve winning team name
+    const { data: match, error: matchFetchError } = await supabase
+      .from('matches')
+      .select('team1, team2')
+      .eq('id', matchId)
+      .single();
+
+    if (matchFetchError || !match) {
+      console.error('Error fetching match:', matchFetchError);
+      return new Response(JSON.stringify({ error: 'Match not found' }), {
+        status: 404,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const normalizedResult = String(result).toLowerCase().trim();
+    let winningSelection: string;
+    if (normalizedResult === 'team1_win' || normalizedResult === 'team1' || normalizedResult === '1') {
+      winningSelection = match.team1;
+    } else if (normalizedResult === 'team2_win' || normalizedResult === 'team2' || normalizedResult === '2') {
+      winningSelection = match.team2;
+    } else if (normalizedResult === 'draw' || normalizedResult === 'x') {
+      winningSelection = 'Draw';
+    } else {
+      // Assume the admin passed the actual team name
+      winningSelection = String(result);
+    }
+
+    console.log(`Winning selection resolved to: "${winningSelection}"`);
+
     // Update match status and result
     const { error: matchError } = await supabase
       .from('matches')
-      .update({ result, status: 'completed' })
+      .update({ result: normalizedResult, status: 'completed' })
       .eq('id', matchId);
 
     if (matchError) {
@@ -110,9 +140,11 @@ Deno.serve(async (req) => {
     let losersCount = 0;
     let totalPayout = 0;
 
+    const normalize = (s: string) => String(s ?? '').trim().toLowerCase();
+
     // Process each bet
     for (const bet of bets || []) {
-      const isWinner = bet.selection.toLowerCase() === result.toLowerCase();
+      const isWinner = normalize(bet.selection) === normalize(winningSelection);
       const betResult = isWinner ? 'won' : 'lost';
       
       console.log(`Processing bet ${bet.id}: user=${bet.user_id}, selection=${bet.selection}, result=${betResult}`);
