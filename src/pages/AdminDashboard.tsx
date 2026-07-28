@@ -15,6 +15,9 @@ import { TransactionsManagement } from "@/components/admin/TransactionsManagemen
 import { AdminVerificationPanel } from "@/components/wagers/AdminVerificationPanel";
 import { DepositVerificationPanel } from "@/components/admin/DepositVerificationPanel";
 import { WebhookHashTester } from "@/components/admin/WebhookHashTester";
+import { SettlementDiagnostics } from "@/components/admin/SettlementDiagnostics";
+import { SettledBetsAudit } from "@/components/admin/SettledBetsAudit";
+import { WalletActivityLog } from "@/components/WalletActivityLog";
 
 interface Match {
   id: string;
