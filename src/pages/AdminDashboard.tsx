@@ -412,6 +412,18 @@ export default function AdminDashboard() {
         </div>
           </TabsContent>
 
+          <TabsContent value="diagnostics">
+            <SettlementDiagnostics />
+          </TabsContent>
+
+          <TabsContent value="settled-bets">
+            <SettledBetsAudit />
+          </TabsContent>
+
+          <TabsContent value="wallet-activity">
+            <WalletActivityLog adminView />
+          </TabsContent>
+
           <TabsContent value="deposits">
             <DepositVerificationPanel />
           </TabsContent>
