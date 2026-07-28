@@ -38,6 +38,7 @@ const Index = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [balance, setBalance] = useState(0);
   const [matches, setMatches] = useState<Match[]>([]);
+  const [matchesLoading, setMatchesLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
   const [depositDialogOpen, setDepositDialogOpen] = useState(false);
