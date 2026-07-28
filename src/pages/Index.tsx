@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/Navbar";
 import { MatchCard } from "@/components/MatchCard";
+import { MatchCardSkeleton } from "@/components/MatchCardSkeleton";
 import { BetSlip } from "@/components/BetSlip";
 import { MyBetsTab } from "@/components/MyBetsTab";
 import { UploadBetSlipDialog } from "@/components/UploadBetSlipDialog";
@@ -37,6 +38,7 @@ const Index = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [balance, setBalance] = useState(0);
   const [matches, setMatches] = useState<Match[]>([]);
+  const [matchesLoading, setMatchesLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
   const [depositDialogOpen, setDepositDialogOpen] = useState(false);
@@ -47,6 +49,16 @@ const Index = () => {
   } = useToast();
   useEffect(() => {
     fetchMatches();
+
+    // Realtime updates for matches (live scores + status)
+    const channel = supabase
+      .channel("matches-live")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "matches" },
+        () => fetchMatches()
+      )
+      .subscribe();
 
     // Set up auth state listener
     const {
@@ -78,18 +90,22 @@ const Index = () => {
         checkAdminRole(session.user.id);
       }
     });
-    return () => subscription.unsubscribe();
+    return () => {
+      subscription.unsubscribe();
+      supabase.removeChannel(channel);
+    };
   }, []);
   const fetchMatches = async () => {
     const {
       data,
       error
-    } = await supabase.from("matches").select("*").eq("status", "upcoming").order("match_date", {
+    } = await supabase.from("matches").select("*").in("status", ["upcoming", "live"]).order("match_date", {
       ascending: true
     });
     if (!error && data) {
       setMatches(data);
     }
+    setMatchesLoading(false);
   };
   const fetchProfile = async (userId: string) => {
     const {
@@ -265,9 +281,17 @@ const Index = () => {
                       Upload Bet Slip
                     </Button>}
                 </div>
-                {matches.length === 0 ? <p className="text-muted-foreground">No matches available</p> : <div className="grid gap-4 md:grid-cols-2">
-                    {matches.map(match => <MatchCard key={match.id} homeTeam={match.team1} awayTeam={match.team2} homeOdds={Number(match.odds_team1_win)} drawOdds={Number(match.odds_draw)} awayOdds={Number(match.odds_team2_win)} startTime={format(new Date(match.match_date), "HH:mm")} league={match.competition} isLive={false} onBetClick={(team, odds) => handleBetClick(match.id, team, odds)} />)}
-                  </div>}
+                {matchesLoading ? (
+                  <div className="grid gap-4 md:grid-cols-2">
+                    {Array.from({ length: 4 }).map((_, i) => <MatchCardSkeleton key={i} />)}
+                  </div>
+                ) : matches.length === 0 ? (
+                  <p className="text-muted-foreground">No matches available</p>
+                ) : (
+                  <div className="grid gap-4 md:grid-cols-2 transition-all duration-500">
+                    {matches.map(match => <MatchCard key={match.id} homeTeam={match.team1} awayTeam={match.team2} homeOdds={Number(match.odds_team1_win)} drawOdds={Number(match.odds_draw)} awayOdds={Number(match.odds_team2_win)} startTime={format(new Date(match.match_date), "HH:mm")} league={match.competition} isLive={match.status === "live"} homeScore={(match as any).team1_score} awayScore={(match as any).team2_score} onBetClick={(team, odds) => handleBetClick(match.id, team, odds)} />)}
+                  </div>
+                )}
               </TabsContent>
 
               <TabsContent value="my-bets" className="space-y-4 mt-6">

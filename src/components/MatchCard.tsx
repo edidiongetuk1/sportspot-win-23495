@@ -84,7 +84,10 @@ export const MatchCard = ({
           <span className="text-base md:text-lg font-semibold text-foreground truncate pr-3">
             {homeTeam}
           </span>
-          <span className="text-xl font-black text-foreground/90 tabular font-mono">
+          <span
+            key={`h-${homeScore}`}
+            className="text-xl font-black text-foreground/90 tabular font-mono transition-all duration-300 animate-scale-in"
+          >
             {isLive && homeScore != null ? homeScore : "—"}
           </span>
         </div>
@@ -93,7 +96,10 @@ export const MatchCard = ({
           <span className="text-base md:text-lg font-semibold text-foreground truncate pr-3">
             {awayTeam}
           </span>
-          <span className="text-xl font-black text-foreground/90 tabular font-mono">
+          <span
+            key={`a-${awayScore}`}
+            className="text-xl font-black text-foreground/90 tabular font-mono transition-all duration-300 animate-scale-in"
+          >
             {isLive && awayScore != null ? awayScore : "—"}
           </span>
         </div>
