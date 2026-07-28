@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/Navbar";
 import { MatchCard } from "@/components/MatchCard";
+import { MatchCardSkeleton } from "@/components/MatchCardSkeleton";
 import { BetSlip } from "@/components/BetSlip";
 import { MyBetsTab } from "@/components/MyBetsTab";
 import { UploadBetSlipDialog } from "@/components/UploadBetSlipDialog";
