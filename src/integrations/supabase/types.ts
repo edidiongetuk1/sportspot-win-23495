@@ -488,6 +488,15 @@ export type Database = {
         }
         Returns: boolean
       }
+      settle_mobile_wager: {
+        Args: {
+          _admin_id: string
+          _admin_notes?: string
+          _wager_id: string
+          _winner_id: string
+        }
+        Returns: Json
+      }
     }
     Enums: {
       app_role: "admin" | "user"

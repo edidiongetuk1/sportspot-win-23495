@@ -4,11 +4,10 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/contexts/ThemeContext";
-import Index from "./pages/Index";
+import { MobileBottomNav } from "@/components/MobileBottomNav";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import AdminDashboard from "./pages/AdminDashboard";
-import Casino from "./pages/Casino";
 import MobileWagers from "./pages/MobileWagers";
 import DepositCallback from "./pages/DepositCallback";
 import Terms from "./pages/Terms";
@@ -25,11 +24,11 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<Index />} />
+            <Route path="/" element={<MobileWagers />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/casino" element={<Casino />} />
+            <Route path="/casino" element={<MobileWagers />} />
             <Route path="/mobile-wagers" element={<MobileWagers />} />
             <Route path="/deposit-callback" element={<DepositCallback />} />
             <Route path="/terms" element={<Terms />} />
@@ -37,6 +36,7 @@ const App = () => (
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <MobileBottomNav />
         </BrowserRouter>
       </TooltipProvider>
     </ThemeProvider>

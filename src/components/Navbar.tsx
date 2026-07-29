@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Wallet, User, LogOut, Plus, Menu } from "lucide-react";
+import { Wallet, Plus, Menu } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -23,7 +23,7 @@ export const Navbar = ({
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2.5 group">
+          <Link to="/mobile-wagers" className="flex items-center gap-2.5 group">
             <div className="relative w-9 h-9 md:w-10 md:h-10 rounded-xl bg-gradient-accent flex items-center justify-center shadow-gold transition-transform duration-300 group-hover:scale-105">
               <span className="font-display text-lg md:text-xl font-black text-primary-foreground">S</span>
               <div className="absolute inset-0 rounded-xl ring-1 ring-primary/40" />
@@ -35,17 +35,8 @@ export const Navbar = ({
 
           {/* Desktop Navigation Links */}
           <div className="hidden lg:flex items-center gap-6">
-            <Link to="/" className="text-foreground hover:text-primary transition-all duration-300 hover:scale-110 relative after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-primary after:scale-x-0 after:origin-left after:transition-transform after:duration-300 hover:after:scale-x-100">
-              Sports
-            </Link>
-            <Link to="/" className="text-muted-foreground hover:text-primary transition-all duration-300 hover:scale-110 relative after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-primary after:scale-x-0 after:origin-left after:transition-transform after:duration-300 hover:after:scale-x-100">
-              Live
-            </Link>
-            <Link to="/casino" className="text-muted-foreground hover:text-primary transition-all duration-300 hover:scale-110 relative after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-primary after:scale-x-0 after:origin-left after:transition-transform after:duration-300 hover:after:scale-x-100">
-              Casino
-            </Link>
-            <Link to="/mobile-wagers" className="text-muted-foreground hover:text-primary transition-all duration-300 hover:scale-110 relative after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-primary after:scale-x-0 after:origin-left after:transition-transform after:duration-300 hover:after:scale-x-100">
-              Mobile Wagers
+            <Link to="/mobile-wagers" className="text-foreground hover:text-primary transition-all duration-300 hover:scale-110 relative after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-primary after:scale-x-0 after:origin-left after:transition-transform after:duration-300 hover:after:scale-x-100">
+              Wagers
             </Link>
           </div>
 
@@ -99,17 +90,8 @@ export const Navbar = ({
               </SheetTrigger>
               <SheetContent side="right" className="w-[280px] animate-slide-in-right">
                 <div className="flex flex-col gap-4 mt-8">
-                  <Link to="/" onClick={() => setIsOpen(false)} className="text-foreground hover:text-primary transition-all duration-300 py-2 hover:pl-2 animate-fade-in-up" style={{animationDelay: '0.1s'}}>
-                    Sports
-                  </Link>
-                  <Link to="/" onClick={() => setIsOpen(false)} className="text-muted-foreground hover:text-primary transition-all duration-300 py-2 hover:pl-2 animate-fade-in-up" style={{animationDelay: '0.2s'}}>
-                    Live
-                  </Link>
-                  <Link to="/casino" onClick={() => setIsOpen(false)} className="text-muted-foreground hover:text-primary transition-all duration-300 py-2 hover:pl-2 animate-fade-in-up" style={{animationDelay: '0.3s'}}>
-                    Casino
-                  </Link>
-                  <Link to="/mobile-wagers" onClick={() => setIsOpen(false)} className="text-muted-foreground hover:text-primary transition-all duration-300 py-2 hover:pl-2 animate-fade-in-up" style={{animationDelay: '0.4s'}}>
-                    Mobile Wagers
+                  <Link to="/mobile-wagers" onClick={() => setIsOpen(false)} className="text-foreground hover:text-primary transition-all duration-300 py-2 hover:pl-2 animate-fade-in-up" style={{animationDelay: '0.1s'}}>
+                    Wagers
                   </Link>
                   {isAuthenticated ? <>
                       <Link to="/dashboard" onClick={() => setIsOpen(false)} className="animate-fade-in-up" style={{animationDelay: '0.5s'}}>
