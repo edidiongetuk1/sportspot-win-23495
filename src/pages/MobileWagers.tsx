@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
@@ -37,6 +37,7 @@ const MobileWagers = () => {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [depositDialogOpen, setDepositDialogOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -253,8 +254,14 @@ const MobileWagers = () => {
     await supabase.auth.signOut();
   };
 
+  const requestedTab = searchParams.get("tab") || "open";
+  const activeTab = requestedTab === "mywagers" || (requestedTab === "admin" && isAdmin) ? requestedTab : "open";
+  const handleTabChange = (value: string) => {
+    setSearchParams({ tab: value });
+  };
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-24 md:pb-0">
       <Navbar 
         balance={balance} 
         isAuthenticated={!!user}
@@ -298,8 +305,8 @@ const MobileWagers = () => {
 
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8">
-        <Tabs defaultValue="open" className="w-full">
-          <TabsList className="w-full justify-start bg-card border border-border mb-6">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+          <TabsList className="w-full justify-start bg-card border border-border mb-6 overflow-x-auto rounded-xl p-1">
             <TabsTrigger value="open">Open Wagers</TabsTrigger>
             <TabsTrigger value="mywagers">
               My Wagers
