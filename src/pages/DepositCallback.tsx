@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
@@ -8,21 +8,34 @@ import { CheckCircle2, XCircle, Clock } from "lucide-react";
 const DepositCallback = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const [verifying, setVerifying] = useState(false);
+
+  const paystackRef = searchParams.get("reference") || searchParams.get("trxref");
 
   useEffect(() => {
-    checkAuth();
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        navigate("/auth");
+        return;
+      }
+      if (paystackRef) {
+        setVerifying(true);
+        try {
+          await supabase.functions.invoke("verify-deposit", { body: { reference: paystackRef } });
+        } catch (e) {
+          console.error("Verification error:", e);
+        } finally {
+          setVerifying(false);
+        }
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const checkAuth = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      navigate("/auth");
-      return;
-    }
-  };
+  const status = paystackRef && !verifying ? "successful" : searchParams.get("status");
+  const txRef = searchParams.get("tx_ref") || paystackRef;
 
-  const status = searchParams.get("status");
-  const txRef = searchParams.get("tx_ref");
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
