@@ -9,6 +9,8 @@ const DepositCallback = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [verifying, setVerifying] = useState(false);
+  const [balance, setBalance] = useState<number | null>(null);
+  const [credited, setCredited] = useState<number | null>(null);
 
   const paystackRef = searchParams.get("reference") || searchParams.get("trxref");
 
@@ -22,7 +24,17 @@ const DepositCallback = () => {
       if (paystackRef) {
         setVerifying(true);
         try {
-          await supabase.functions.invoke("verify-deposit", { body: { reference: paystackRef } });
+          const { data } = await supabase.functions.invoke("verify-deposit", {
+            body: { reference: paystackRef },
+          });
+          if (typeof data?.amount === "number") setCredited(data.amount);
+          if (typeof data?.newBalance === "number") {
+            setBalance(data.newBalance);
+          } else {
+            const { data: profile } = await supabase
+              .from("profiles").select("balance").eq("id", user.id).maybeSingle();
+            if (profile) setBalance(Number(profile.balance));
+          }
         } catch (e) {
           console.error("Verification error:", e);
         } finally {
@@ -35,6 +47,8 @@ const DepositCallback = () => {
 
   const status = paystackRef && !verifying ? "successful" : searchParams.get("status");
   const txRef = searchParams.get("tx_ref") || paystackRef;
+
+
 
 
   return (
