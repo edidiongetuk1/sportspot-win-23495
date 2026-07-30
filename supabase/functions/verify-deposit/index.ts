@@ -5,6 +5,12 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+const json = (body: unknown, status = 200) =>
+  new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+  });
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -12,165 +18,110 @@ Deno.serve(async (req) => {
 
   try {
     const { reference } = await req.json();
-    
-    if (!reference) {
-      return new Response(
-        JSON.stringify({ error: 'Payment reference is required' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    if (!reference || typeof reference !== 'string') {
+      return json({ error: 'Payment reference is required' }, 400);
     }
 
     const paystackSecret = Deno.env.get('PAYSTACK_SECRET_KEY');
     if (!paystackSecret) {
       console.error('PAYSTACK_SECRET_KEY not configured');
-      return new Response(
-        JSON.stringify({ error: 'Payment verification not configured' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return json({ error: 'Payment verification not configured' }, 500);
     }
 
-    // Verify transaction with Paystack API
-    console.log('Verifying payment with reference:', reference);
-    const verifyResponse = await fetch(
-      `https://api.paystack.co/transaction/verify/${reference}`,
-      {
-        headers: {
-          'Authorization': `Bearer ${paystackSecret}`,
-          'Content-Type': 'application/json',
-        },
-      }
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     );
 
+    // Verify transaction with Paystack
+    const verifyResponse = await fetch(
+      `https://api.paystack.co/transaction/verify/${encodeURIComponent(reference)}`,
+      { headers: { Authorization: `Bearer ${paystackSecret}` } }
+    );
     const verifyData = await verifyResponse.json();
-    console.log('Paystack verification response:', verifyData);
 
-    if (!verifyData.status || verifyData.data.status !== 'success') {
-      return new Response(
-        JSON.stringify({ 
-          error: 'Payment verification failed',
-          details: verifyData.message 
-        }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    if (!verifyData.status || verifyData.data?.status !== 'success') {
+      return json({ error: 'Payment verification failed', details: verifyData.message }, 400);
     }
 
-    // Initialize Supabase client
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    const customerEmail = verifyData.data.customer.email as string;
+    const depositAmount = Number(verifyData.data.amount) / 100;
 
-    // Get user by email
-    const customerEmail = verifyData.data.customer.email;
-    const { data: { users }, error: userError } = await supabase.auth.admin.listUsers();
-    
-    if (userError) {
-      console.error('Error fetching users:', userError);
-      throw userError;
+    // Resolve user: prefer metadata.user_id, fall back to email lookup
+    let userId: string | undefined = verifyData.data.metadata?.user_id;
+    if (!userId) {
+      const { data: { users }, error: userError } = await supabase.auth.admin.listUsers();
+      if (userError) throw userError;
+      userId = users.find((u) => u.email === customerEmail)?.id;
+    }
+    if (!userId) return json({ error: 'User not found' }, 404);
+
+    // ---- Strict idempotency: unique (provider, reference) claim ----
+    const { error: claimError } = await supabase
+      .from('payment_credits')
+      .insert({ provider: 'paystack', reference, user_id: userId, amount: depositAmount });
+
+    if (claimError) {
+      if (claimError.code === '23505') {
+        const { data: p } = await supabase
+          .from('profiles').select('balance').eq('id', userId).maybeSingle();
+        console.log('Duplicate credit blocked for reference:', reference);
+        return json({
+          success: true,
+          alreadyProcessed: true,
+          amount: depositAmount,
+          newBalance: p ? Number(p.balance) : undefined,
+          message: 'Transaction already processed',
+        });
+      }
+      throw claimError;
     }
 
-    const user = users.find(u => u.email === customerEmail);
-    
-    if (!user) {
-      console.error('User not found for email:', customerEmail);
-      return new Response(
-        JSON.stringify({ error: 'User not found' }),
-        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    // Get user's profile
     const { data: profile, error: profileError } = await supabase
-      .from('profiles')
-      .select('id, balance')
-      .eq('id', user.id)
-      .single();
+      .from('profiles').select('id, balance').eq('id', userId).maybeSingle();
 
     if (profileError || !profile) {
-      console.error('Profile not found for user:', user.id);
-      return new Response(
-        JSON.stringify({ error: 'Profile not found' }),
-        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      await supabase.from('payment_credits')
+        .delete().eq('provider', 'paystack').eq('reference', reference);
+      return json({ error: 'Profile not found' }, 404);
     }
 
-    // Check if this transaction was already processed
-    const { data: existingLog } = await supabase
-      .from('audit_logs')
-      .select('id')
-      .eq('metadata->>payment_reference', reference)
-      .single();
-
-    if (existingLog) {
-      console.log('Transaction already processed:', reference);
-      return new Response(
-        JSON.stringify({ 
-          success: true, 
-          message: 'Transaction already processed',
-          balance: profile.balance 
-        }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    // Update balance
-    const depositAmount = verifyData.data.amount / 100; // Convert from kobo to naira
     const oldBalance = Number(profile.balance);
     const newBalance = oldBalance + depositAmount;
 
     const { error: updateError } = await supabase
-      .from('profiles')
-      .update({ balance: newBalance })
-      .eq('id', profile.id);
+      .from('profiles').update({ balance: newBalance }).eq('id', profile.id);
 
     if (updateError) {
-      console.error('Failed to update balance:', updateError);
+      await supabase.from('payment_credits')
+        .delete().eq('provider', 'paystack').eq('reference', reference);
       throw updateError;
     }
 
-    // Create audit log
-    const { error: auditError } = await supabase
-      .from('audit_logs')
-      .insert({
-        user_id: profile.id,
-        action_type: 'deposit',
-        amount: depositAmount,
-        balance_before: oldBalance,
-        balance_after: newBalance,
-        reference_type: 'deposit',
-        metadata: {
-          payment_reference: reference,
-          customer_email: customerEmail,
-          verified_at: new Date().toISOString()
-        }
-      });
-
-    if (auditError) {
-      console.error('Failed to create audit log:', auditError);
-    }
-
-    console.log('Deposit processed successfully:', {
-      userId: profile.id,
-      oldBalance,
-      depositAmount,
-      newBalance
+    await supabase.from('audit_logs').insert({
+      user_id: profile.id,
+      action_type: 'deposit',
+      amount: depositAmount,
+      balance_before: oldBalance,
+      balance_after: newBalance,
+      reference_type: 'deposit',
+      metadata: {
+        payment_reference: reference,
+        provider: 'paystack',
+        customer_email: customerEmail,
+        verified_at: new Date().toISOString(),
+      },
     });
 
-    return new Response(
-      JSON.stringify({ 
-        success: true,
-        amount: depositAmount,
-        newBalance,
-        message: 'Deposit processed successfully'
-      }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
-
+    return json({
+      success: true,
+      alreadyProcessed: false,
+      amount: depositAmount,
+      newBalance,
+      message: 'Deposit processed successfully',
+    });
   } catch (error) {
     console.error('Payment verification error:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    return new Response(
-      JSON.stringify({ error: errorMessage }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+    return json({ error: error instanceof Error ? error.message : 'Unknown error' }, 500);
   }
 });

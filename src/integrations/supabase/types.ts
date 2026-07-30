@@ -307,6 +307,33 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_credits: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          provider: string
+          reference: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          provider: string
+          reference: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          provider?: string
+          reference?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           balance: number
