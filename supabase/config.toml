@@ -20,3 +20,7 @@ verify_jwt = false
 
 [functions.verify-deposit]
 verify_jwt = true
+
+[functions.paystack-initiate]
+verify_jwt = true
+
