@@ -47,6 +47,81 @@ Deno.serve(async (req) => {
     const event = JSON.parse(body);
     console.log('Paystack webhook event:', event.event);
 
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    );
+
+    // ---- Payout (transfer) events ----
+    if (typeof event.event === 'string' && event.event.startsWith('transfer.')) {
+      const transferRef = event.data?.reference;
+      const transferCode = event.data?.transfer_code;
+
+      let query = supabase.from('withdrawals').select('*').limit(1);
+      query = transferRef
+        ? query.eq('transfer_reference', transferRef)
+        : query.eq('transfer_code', transferCode);
+
+      const { data: rows } = await query;
+      const withdrawal = rows?.[0];
+
+      if (!withdrawal) {
+        console.error('No withdrawal found for transfer:', { transferRef, transferCode });
+        return json({ received: true });
+      }
+
+      if (['approved', 'failed', 'rejected'].includes(withdrawal.status)) {
+        console.log('Transfer already finalized for withdrawal:', withdrawal.id);
+        return json({ received: true, alreadyProcessed: true });
+      }
+
+      if (event.event === 'transfer.success') {
+        await supabase
+          .from('withdrawals')
+          .update({ status: 'approved', processed_at: new Date().toISOString(), failure_reason: null })
+          .eq('id', withdrawal.id);
+        console.log('Withdrawal payout completed:', withdrawal.id);
+        return json({ received: true });
+      }
+
+      // transfer.failed / transfer.reversed -> refund the user
+      const amount = Number(withdrawal.amount);
+      const { data: profile } = await supabase
+        .from('profiles').select('id, balance').eq('id', withdrawal.user_id).maybeSingle();
+
+      if (profile) {
+        const before = Number(profile.balance);
+        const after = before + amount;
+        await supabase.from('profiles').update({ balance: after }).eq('id', profile.id);
+        await supabase.from('audit_logs').insert({
+          user_id: profile.id,
+          action_type: 'deposit',
+          amount,
+          balance_before: before,
+          balance_after: after,
+          reference_id: withdrawal.id,
+          reference_type: 'withdrawal',
+          metadata: {
+            provider: 'paystack',
+            event: event.event,
+            note: 'Withdrawal payout reversed — funds returned',
+          },
+        });
+      }
+
+      await supabase
+        .from('withdrawals')
+        .update({
+          status: 'failed',
+          processed_at: new Date().toISOString(),
+          failure_reason: event.data?.reason ?? event.event,
+        })
+        .eq('id', withdrawal.id);
+
+      console.log('Withdrawal payout failed and refunded:', withdrawal.id);
+      return json({ received: true });
+    }
+
     if (event.event !== 'charge.success') {
       return json({ received: true });
     }
@@ -54,10 +129,6 @@ Deno.serve(async (req) => {
     const { customer, amount, metadata, reference } = event.data;
     const depositAmount = Number(amount) / 100;
 
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL')!,
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-    );
 
     let userId: string | undefined = metadata?.user_id;
     if (!userId) {
