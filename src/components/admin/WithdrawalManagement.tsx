@@ -221,6 +221,20 @@ export const WithdrawalManagement = () => {
                     </div>
                   )}
 
+                  {withdrawal.failure_reason && (
+                    <div className="bg-destructive/10 text-destructive p-2 rounded text-sm">
+                      <span className="opacity-80">Payout issue:</span>
+                      <p>{withdrawal.failure_reason}</p>
+                    </div>
+                  )}
+
+                  {withdrawal.status === 'processing' && (
+                    <p className="text-sm text-muted-foreground">
+                      Payout sent to the bank — awaiting confirmation.
+                    </p>
+                  )}
+
+
                   {withdrawal.status === 'pending' && (
                     <div className="flex gap-2 pt-2">
                       <Button
