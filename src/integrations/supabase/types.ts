@@ -334,6 +334,42 @@ export type Database = {
         }
         Relationships: []
       }
+      payout_recipients: {
+        Row: {
+          account_number: string
+          bank_code: string
+          bank_name: string | null
+          created_at: string
+          id: string
+          provider: string
+          recipient_code: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          account_number: string
+          bank_code: string
+          bank_name?: string | null
+          created_at?: string
+          id?: string
+          provider?: string
+          recipient_code: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          account_number?: string
+          bank_code?: string
+          bank_name?: string | null
+          created_at?: string
+          id?: string
+          provider?: string
+          recipient_code?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           balance: number
@@ -468,10 +504,16 @@ export type Database = {
           amount: number
           approved_at: string | null
           approved_by: string | null
+          bank_code: string | null
           bank_name: string
           created_at: string
+          failure_reason: string | null
           id: string
+          processed_at: string | null
+          recipient_code: string | null
           status: string
+          transfer_code: string | null
+          transfer_reference: string | null
           updated_at: string
           user_id: string
         }
@@ -481,10 +523,16 @@ export type Database = {
           amount: number
           approved_at?: string | null
           approved_by?: string | null
+          bank_code?: string | null
           bank_name: string
           created_at?: string
+          failure_reason?: string | null
           id?: string
+          processed_at?: string | null
+          recipient_code?: string | null
           status?: string
+          transfer_code?: string | null
+          transfer_reference?: string | null
           updated_at?: string
           user_id: string
         }
@@ -494,10 +542,16 @@ export type Database = {
           amount?: number
           approved_at?: string | null
           approved_by?: string | null
+          bank_code?: string | null
           bank_name?: string
           created_at?: string
+          failure_reason?: string | null
           id?: string
+          processed_at?: string | null
+          recipient_code?: string | null
           status?: string
+          transfer_code?: string | null
+          transfer_reference?: string | null
           updated_at?: string
           user_id?: string
         }
