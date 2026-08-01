@@ -273,9 +273,10 @@ export const WithdrawalManagement = () => {
             </AlertDialogTitle>
             <AlertDialogDescription>
               {action === 'approve' 
-                ? `Approve withdrawal of ₦${selectedWithdrawal?.amount.toLocaleString()} to ${selectedWithdrawal?.profiles.email}?`
+                ? `This sends ₦${selectedWithdrawal?.amount.toLocaleString()} automatically to ${selectedWithdrawal?.bank_name} • ${selectedWithdrawal?.account_number} (${selectedWithdrawal?.profiles.email}). The balance is debited immediately and refunded automatically if the payout fails.`
                 : `Reject withdrawal request from ${selectedWithdrawal?.profiles.email}?`
               }
+
             </AlertDialogDescription>
           </AlertDialogHeader>
           
