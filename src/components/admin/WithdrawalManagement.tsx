@@ -152,14 +152,18 @@ export const WithdrawalManagement = () => {
     switch (status) {
       case 'pending':
         return 'bg-yellow-500';
+      case 'processing':
+        return 'bg-blue-500';
       case 'approved':
         return 'bg-green-500';
       case 'rejected':
+      case 'failed':
         return 'bg-red-500';
       default:
         return 'bg-gray-500';
     }
   };
+
 
   if (loading) {
     return <div>Loading withdrawals...</div>;
