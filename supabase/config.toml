@@ -24,3 +24,7 @@ verify_jwt = true
 [functions.paystack-initiate]
 verify_jwt = true
 
+[functions.paystack-banks]
+verify_jwt = true
+
+
