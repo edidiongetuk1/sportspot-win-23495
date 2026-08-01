@@ -22,14 +22,18 @@ interface Withdrawal {
   amount: number;
   account_number: string;
   bank_name: string;
+  bank_code: string | null;
   status: string;
   created_at: string;
   admin_notes: string | null;
+  failure_reason: string | null;
+  transfer_reference: string | null;
   profiles: {
     email: string;
     balance: number;
   };
 }
+
 
 export const WithdrawalManagement = () => {
   const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([]);
