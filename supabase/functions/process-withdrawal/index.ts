@@ -172,7 +172,7 @@ Deno.serve(async (req): Promise<Response> => {
           },
           body: JSON.stringify({
             type: 'nuban',
-            name: withdrawal.account_name || profile.email,
+            name: profile.email,
             account_number: withdrawal.account_number,
             bank_code: bankCode,
             currency: 'NGN',
