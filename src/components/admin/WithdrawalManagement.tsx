@@ -22,14 +22,18 @@ interface Withdrawal {
   amount: number;
   account_number: string;
   bank_name: string;
+  bank_code: string | null;
   status: string;
   created_at: string;
   admin_notes: string | null;
+  failure_reason: string | null;
+  transfer_reference: string | null;
   profiles: {
     email: string;
     balance: number;
   };
 }
+
 
 export const WithdrawalManagement = () => {
   const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([]);
@@ -148,14 +152,18 @@ export const WithdrawalManagement = () => {
     switch (status) {
       case 'pending':
         return 'bg-yellow-500';
+      case 'processing':
+        return 'bg-blue-500';
       case 'approved':
         return 'bg-green-500';
       case 'rejected':
+      case 'failed':
         return 'bg-red-500';
       default:
         return 'bg-gray-500';
     }
   };
+
 
   if (loading) {
     return <div>Loading withdrawals...</div>;
@@ -213,6 +221,20 @@ export const WithdrawalManagement = () => {
                     </div>
                   )}
 
+                  {withdrawal.failure_reason && (
+                    <div className="bg-destructive/10 text-destructive p-2 rounded text-sm">
+                      <span className="opacity-80">Payout issue:</span>
+                      <p>{withdrawal.failure_reason}</p>
+                    </div>
+                  )}
+
+                  {withdrawal.status === 'processing' && (
+                    <p className="text-sm text-muted-foreground">
+                      Payout sent to the bank — awaiting confirmation.
+                    </p>
+                  )}
+
+
                   {withdrawal.status === 'pending' && (
                     <div className="flex gap-2 pt-2">
                       <Button
@@ -251,9 +273,10 @@ export const WithdrawalManagement = () => {
             </AlertDialogTitle>
             <AlertDialogDescription>
               {action === 'approve' 
-                ? `Approve withdrawal of ₦${selectedWithdrawal?.amount.toLocaleString()} to ${selectedWithdrawal?.profiles.email}?`
+                ? `This sends ₦${selectedWithdrawal?.amount.toLocaleString()} automatically to ${selectedWithdrawal?.bank_name} • ${selectedWithdrawal?.account_number} (${selectedWithdrawal?.profiles.email}). The balance is debited immediately and refunded automatically if the payout fails.`
                 : `Reject withdrawal request from ${selectedWithdrawal?.profiles.email}?`
               }
+
             </AlertDialogDescription>
           </AlertDialogHeader>
           
