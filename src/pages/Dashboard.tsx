@@ -12,6 +12,8 @@ import { WithdrawalDialog } from "@/components/WithdrawalDialog";
 import { DepositDialog } from "@/components/DepositDialog";
 import { AuditLogsList } from "@/components/AuditLogsList";
 import { WalletActivityLog } from "@/components/WalletActivityLog";
+import { WithdrawalStatusList } from "@/components/WithdrawalStatusList";
+
 
 interface Bet {
   id: string;
