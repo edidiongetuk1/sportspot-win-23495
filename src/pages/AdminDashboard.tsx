@@ -11,6 +11,8 @@ import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
 import { format } from "date-fns";
 import { WithdrawalManagement } from "@/components/admin/WithdrawalManagement";
+import { PaystackReadinessPanel } from "@/components/admin/PaystackReadinessPanel";
+
 import { TransactionsManagement } from "@/components/admin/TransactionsManagement";
 import { AdminVerificationPanel } from "@/components/wagers/AdminVerificationPanel";
 import { DepositVerificationPanel } from "@/components/admin/DepositVerificationPanel";
@@ -432,9 +434,11 @@ export default function AdminDashboard() {
             <AdminVerificationPanel />
           </TabsContent>
 
-          <TabsContent value="withdrawals">
+          <TabsContent value="withdrawals" className="space-y-8">
+            <PaystackReadinessPanel />
             <WithdrawalManagement />
           </TabsContent>
+
 
           <TabsContent value="transactions">
             <TransactionsManagement />
