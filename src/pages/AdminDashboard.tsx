@@ -432,9 +432,11 @@ export default function AdminDashboard() {
             <AdminVerificationPanel />
           </TabsContent>
 
-          <TabsContent value="withdrawals">
+          <TabsContent value="withdrawals" className="space-y-8">
+            <PaystackReadinessPanel />
             <WithdrawalManagement />
           </TabsContent>
+
 
           <TabsContent value="transactions">
             <TransactionsManagement />
