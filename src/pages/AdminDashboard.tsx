@@ -11,6 +11,8 @@ import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
 import { format } from "date-fns";
 import { WithdrawalManagement } from "@/components/admin/WithdrawalManagement";
+import { PaystackReadinessPanel } from "@/components/admin/PaystackReadinessPanel";
+
 import { TransactionsManagement } from "@/components/admin/TransactionsManagement";
 import { AdminVerificationPanel } from "@/components/wagers/AdminVerificationPanel";
 import { DepositVerificationPanel } from "@/components/admin/DepositVerificationPanel";
